@@ -1,0 +1,1003 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>応用情報 可視化ラーニング - UIプロトタイプ</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-muted: #f8fafc;
+      --text: #172033;
+      --text-sub: #58657a;
+      --line: #dfe5ee;
+      --primary: #2458d3;
+      --primary-hover: #1746b8;
+      --primary-soft: #edf3ff;
+      --accent: #d97706;
+      --accent-soft: #fff7e8;
+      --success: #15803d;
+      --success-soft: #ecfdf3;
+      --danger: #b42318;
+      --shadow: 0 12px 30px rgba(23, 32, 51, 0.08);
+      --radius: 16px;
+      --max: 1160px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+      line-height: 1.65;
+    }
+
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, a:focus-visible { outline: 3px solid rgba(36, 88, 211, .25); outline-offset: 3px; }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-inner {
+      width: min(100% - 32px, var(--max));
+      min-height: 68px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 8px 0;
+      text-align: left;
+      font-weight: 800;
+      letter-spacing: .01em;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: -2px;
+      color: var(--text-sub);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .global-nav { display: flex; gap: 6px; align-items: center; }
+    .nav-btn {
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-sub);
+      padding: 9px 12px;
+      font-weight: 700;
+    }
+    .nav-btn:hover { background: var(--surface-muted); color: var(--text); }
+    .nav-btn[aria-current="page"] { background: var(--primary-soft); color: var(--primary); }
+
+    main { min-height: calc(100vh - 68px); }
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .page {
+      width: min(100% - 32px, var(--max));
+      margin: 0 auto;
+      padding: 42px 0 72px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 14px; font-size: clamp(28px, 4vw, 44px); line-height: 1.24; letter-spacing: -.025em; }
+    h2 { margin-bottom: 12px; font-size: clamp(22px, 3vw, 30px); line-height: 1.35; }
+    h3 { margin-bottom: 8px; font-size: 18px; line-height: 1.45; }
+    p { color: var(--text-sub); }
+
+    .lead { max-width: 760px; font-size: 17px; }
+    .section-heading { margin-bottom: 20px; }
+    .section-heading p { margin-bottom: 0; }
+
+    .hero {
+      padding: 32px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #ffffff 0%, #f7faff 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-actions, .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      min-height: 46px;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      padding: 10px 16px;
+      font-weight: 800;
+      transition: .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { border-color: var(--line); background: var(--surface); color: var(--text); }
+    .btn-secondary:hover { border-color: #c8d2e1; background: #fbfcfe; }
+    .btn:disabled { cursor: not-allowed; opacity: .48; transform: none; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 20px;
+    }
+    .card p:last-child { margin-bottom: 0; }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 14px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    .section { margin-top: 36px; }
+
+    .page-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .back-link {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      padding: 0;
+      font-weight: 800;
+    }
+
+    .material-grid { display: grid; gap: 16px; }
+    .material-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 22px;
+      box-shadow: 0 7px 20px rgba(23,32,51,.04);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .muted-note {
+      border: 1px dashed #cdd6e3;
+      border-radius: 12px;
+      background: var(--surface-muted);
+      padding: 14px 16px;
+      color: var(--text-sub);
+      font-size: 14px;
+    }
+
+    .learning-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .visual-panel, .explain-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 7px 20px rgba(23,32,51,.04);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-head h2, .panel-head h3 { margin-bottom: 2px; }
+    .panel-head p { margin-bottom: 0; font-size: 14px; }
+
+    .status-badge {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--surface-muted);
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .status-badge.running { background: var(--accent-soft); color: #a55300; }
+    .status-badge.done { background: var(--success-soft); color: var(--success); }
+
+    .visual-body { padding: 20px; }
+
+    .condition-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .condition-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-muted);
+      padding: 12px 14px;
+    }
+    .condition-label { color: var(--text-sub); font-size: 12px; font-weight: 800; }
+    .condition-value { margin-top: 3px; font-weight: 800; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-bottom: 14px;
+      color: var(--text-sub);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 4px; background: #d8e2f3; }
+    .legend-dot.compare { background: #f59e0b; }
+    .legend-dot.changed { background: #7c3aed; }
+    .legend-dot.done { background: #16a34a; }
+
+    .bars-wrap {
+      height: 300px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      padding: 24px 10px 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(to top, #f8fafc 0%, #ffffff 100%);
+      overflow: hidden;
+    }
+
+    .bar-column {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .bar {
+      position: relative;
+      min-height: 42px;
+      border-radius: 10px 10px 4px 4px;
+      background: #d8e2f3;
+      transition: height .18s ease, background .18s ease, transform .18s ease;
+    }
+    .bar.compare { background: #f59e0b; transform: translateY(-4px); }
+    .bar.changed { background: #7c3aed; transform: translateY(-4px); }
+    .bar.done { background: #16a34a; }
+    .bar-value {
+      position: absolute;
+      inset: 8px 0 auto;
+      text-align: center;
+      color: #111827;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .bar.done .bar-value, .bar.changed .bar-value { color: white; }
+    .bar-index { text-align: center; color: var(--text-sub); font-size: 11px; font-weight: 700; }
+
+    .array-view {
+      margin-top: 14px;
+      border-radius: 10px;
+      background: #111827;
+      color: #f9fafb;
+      padding: 10px 12px;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+    }
+
+    .controls {
+      position: sticky;
+      bottom: 10px;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.96);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .controls .btn { width: 100%; }
+
+    .explain-panel { overflow: hidden; }
+    .explain-section {
+      padding: 18px 20px;
+      border-top: 1px solid var(--line);
+    }
+    .explain-section:first-child { border-top: 0; }
+    .explain-section p:last-child { margin-bottom: 0; }
+
+    .current-action {
+      border-left: 4px solid var(--primary);
+      background: var(--primary-soft);
+      padding: 14px;
+      border-radius: 10px;
+    }
+    .current-action strong { display: block; margin-bottom: 4px; }
+    .current-action p { margin-bottom: 0; color: #35506f; }
+
+    .result-block {
+      border: 1px solid #b9dfc8;
+      border-radius: 12px;
+      background: var(--success-soft);
+      padding: 14px;
+    }
+    .locked-block {
+      border: 1px dashed #d7dee9;
+      border-radius: 12px;
+      background: var(--surface-muted);
+      padding: 14px;
+      color: var(--text-sub);
+      font-size: 14px;
+    }
+
+    .history-list { display: grid; gap: 12px; }
+    .history-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 18px 20px;
+    }
+    .history-time { color: var(--text-sub); font-size: 14px; }
+    .empty-state {
+      border: 1px dashed #cdd6e3;
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .prototype-note {
+      margin-top: 28px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      color: var(--text-sub);
+      font-size: 13px;
+    }
+
+    @media (max-width: 820px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .learning-shell { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .bars-wrap { height: 270px; }
+    }
+
+    @media (max-width: 620px) {
+      .header-inner { width: min(100% - 20px, var(--max)); min-height: 62px; gap: 10px; }
+      .brand { font-size: 14px; }
+      .brand small { display: none; }
+      .global-nav { gap: 2px; }
+      .nav-btn { padding: 8px 9px; font-size: 12px; }
+      .page { width: min(100% - 20px, var(--max)); padding: 26px 0 56px; }
+      .hero { padding: 22px 18px; border-radius: 18px; }
+      h1 { font-size: 29px; }
+      .lead { font-size: 15px; }
+      .page-title-row { align-items: flex-start; flex-direction: column; }
+      .material-card, .history-item { grid-template-columns: 1fr; }
+      .material-card .btn, .history-item .btn { width: 100%; }
+      .condition-box { grid-template-columns: 1fr; }
+      .bars-wrap { height: 250px; gap: 7px; padding-inline: 7px; }
+      .bar-value { font-size: 12px; }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .controls .reset-btn { grid-column: 1 / -1; }
+      .panel-head, .visual-body, .explain-section { padding-left: 16px; padding-right: 16px; }
+    }
+
+    @media (max-width: 360px) {
+      .header-inner { width: calc(100% - 14px); }
+      .brand { max-width: 92px; line-height: 1.25; }
+      .nav-btn { padding: 8px 6px; font-size: 11px; }
+      .page { width: calc(100% - 16px); }
+      .hero-actions, .button-row { flex-direction: column; }
+      .hero-actions .btn, .button-row .btn { width: 100%; }
+      .bars-wrap { height: 235px; gap: 5px; }
+      .controls { grid-template-columns: 1fr; }
+      .controls .reset-btn { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <button class="brand" data-go="home" aria-label="HOMEへ移動">
+        応用情報 可視化ラーニング
+        <small>ステップ実行で「なぜ」を理解する</small>
+      </button>
+      <nav class="global-nav" aria-label="メインナビゲーション">
+        <button class="nav-btn" data-go="home">HOME</button>
+        <button class="nav-btn" data-go="materials">学習一覧</button>
+        <button class="nav-btn" data-go="history">学習履歴</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="screen-home" class="screen active" data-screen="home">
+      <div class="page">
+        <div class="hero">
+          <div class="eyebrow">応用情報技術者試験 学習支援</div>
+          <h1>処理を1ステップずつ進めて、<br>「なぜそうなるのか」を理解する。</h1>
+          <p class="lead">
+            文章だけでは追いにくいアルゴリズムや内部状態の変化を、処理の流れに沿って可視化する学習アプリです。
+            まずは固定された教材データを使い、結果だけでなく途中経過を確認します。
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-go="materials">学習を始める</button>
+            <button class="btn btn-secondary" data-go="history">学習履歴を見る</button>
+          </div>
+        </div>
+
+        <section class="section" aria-labelledby="how-title">
+          <div class="section-heading">
+            <div class="eyebrow">学び方</div>
+            <h2 id="how-title">結果を見るだけで終わらない学習フロー</h2>
+            <p>教材ごとに、初期状態から最終結果までを順番に確認します。</p>
+          </div>
+          <div class="info-grid">
+            <article class="card">
+              <div class="step-number">1</div>
+              <h3>初期状態・条件を確認</h3>
+              <p>教材で使うデータと、何を理解するための教材なのかを最初に確認します。</p>
+            </article>
+            <article class="card">
+              <div class="step-number">2</div>
+              <h3>処理を1ステップずつ実行</h3>
+              <p>その時点で何を比較・処理しているかと、状態がどう変化したかを見比べます。</p>
+            </article>
+            <article class="card">
+              <div class="step-number">3</div>
+              <h3>結果の理由まで確認</h3>
+              <p>最終結果だけでなく、「なぜそうなるのか」「そこから何が分かるか」を確認します。</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="card">
+            <div class="eyebrow">MVP教材</div>
+            <h2>ソートアルゴリズム可視化</h2>
+            <p>配列内の値を比較し、必要に応じて交換しながら整列されていく様子を、1ステップずつ確認します。</p>
+            <div class="button-row">
+              <button class="btn btn-primary" data-open-material="sort-visualizer">この教材を開く</button>
+              <button class="btn btn-secondary" data-go="materials">学習一覧を見る</button>
+            </div>
+          </div>
+        </section>
+
+        <p class="prototype-note">UI確認用プロトタイプ：認証・問題演習・学習分析・自由入力は含みません。</p>
+      </div>
+    </section>
+
+    <section id="screen-materials" class="screen" data-screen="materials">
+      <div class="page">
+        <div class="page-title-row">
+          <div>
+            <div class="eyebrow">Learning Materials</div>
+            <h1>学習一覧</h1>
+            <p>利用できる可視化教材から、確認したい内容を選びます。</p>
+          </div>
+          <button class="back-link" data-go="home">← HOMEへ戻る</button>
+        </div>
+
+        <div class="material-grid" id="material-list"></div>
+
+        <div class="muted-note section">
+          MVPでは教材は1件のみです。カード型の一覧構造にしているため、教材情報を追加した場合も同じ形式で並べられることをUI上で確認できます。
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-material" class="screen" data-screen="material">
+      <div class="page">
+        <div class="page-title-row">
+          <div>
+            <div class="eyebrow">Visualization Material</div>
+            <div class="tag" id="material-field">アルゴリズム</div>
+            <h1 id="material-title" style="margin-top:10px;">ソートアルゴリズム可視化</h1>
+            <p id="material-summary">配列の比較と交換をステップ単位で確認し、整列までの流れを理解します。</p>
+          </div>
+          <button class="back-link" data-go="materials">← 学習一覧へ戻る</button>
+        </div>
+
+        <div class="learning-shell">
+          <section class="visual-panel" aria-labelledby="visual-title">
+            <div class="panel-head">
+              <div>
+                <h2 id="visual-title">状態変化の可視化</h2>
+                <p>固定データを使い、比較と交換を1ステップずつ確認します。</p>
+              </div>
+              <span id="run-status" class="status-badge">開始前</span>
+            </div>
+
+            <div class="visual-body">
+              <div class="condition-box" aria-label="初期状態と条件">
+                <div class="condition-item">
+                  <div class="condition-label">初期配列</div>
+                  <div class="condition-value mono">[5, 2, 4, 1, 3]</div>
+                </div>
+                <div class="condition-item">
+                  <div class="condition-label">今回確認すること</div>
+                  <div class="condition-value">隣り合う値の比較と交換</div>
+                </div>
+              </div>
+
+              <div class="legend" aria-label="色の意味">
+                <span><i class="legend-dot"></i>通常</span>
+                <span><i class="legend-dot compare"></i>比較中</span>
+                <span><i class="legend-dot changed"></i>交換あり</span>
+                <span><i class="legend-dot done"></i>最終結果</span>
+              </div>
+
+              <div id="bars" class="bars-wrap" aria-live="polite" aria-label="配列の状態を表す棒グラフ"></div>
+              <div id="array-view" class="array-view mono" aria-label="現在の配列">[5, 2, 4, 1, 3]</div>
+
+              <div class="controls" aria-label="教材操作">
+                <button id="start-btn" class="btn btn-primary">処理を開始</button>
+                <button id="step-btn" class="btn btn-primary" disabled>1ステップ実行</button>
+                <button id="reset-btn" class="btn btn-secondary reset-btn">初期状態に戻す</button>
+              </div>
+            </div>
+          </section>
+
+          <aside class="explain-panel" aria-label="現在の処理と解説">
+            <div class="explain-section">
+              <div class="eyebrow">Current Step</div>
+              <h3>現在の処理内容</h3>
+              <div class="current-action" id="current-action">
+                <strong>まだ処理は始まっていません</strong>
+                <p>初期状態を確認したら「処理を開始」を押してください。</p>
+              </div>
+            </div>
+
+            <div class="explain-section">
+              <div class="eyebrow">Step Progress</div>
+              <h3>ステップ状況</h3>
+              <p id="step-progress">0 / 10 ステップ</p>
+            </div>
+
+            <div class="explain-section">
+              <div class="eyebrow">Result</div>
+              <h3>最終結果</h3>
+              <div id="final-result" class="locked-block">処理完了後に最終結果を表示します。</div>
+            </div>
+
+            <div class="explain-section">
+              <div class="eyebrow">Why</div>
+              <h3>なぜそうなるのか</h3>
+              <div id="why-block" class="locked-block">処理完了後に解説を表示します。</div>
+            </div>
+
+            <div class="explain-section">
+              <div class="eyebrow">Insight</div>
+              <h3>そこから何が分かるか</h3>
+              <div id="insight-block" class="locked-block">処理完了後に学習ポイントを表示します。</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-history" class="screen" data-screen="history">
+      <div class="page">
+        <div class="page-title-row">
+          <div>
+            <div class="eyebrow">Learning History</div>
+            <h1>学習履歴</h1>
+            <p>このブラウザ・端末で最近開いた教材を確認できます。</p>
+          </div>
+          <button class="back-link" data-go="home">← HOMEへ戻る</button>
+        </div>
+
+        <div class="muted-note" style="margin-bottom:16px;">
+          MVPでは「教材ID」と「最後に開いた日時」のみを端末内に保存します。学習時間・進捗率・スコア・理解度などは記録しません。
+        </div>
+
+        <div id="history-list" class="history-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'apStudyPrototypeHistory';
+
+      const materials = [
+        {
+          id: 'sort-visualizer',
+          name: 'ソートアルゴリズム可視化',
+          field: 'アルゴリズム',
+          summary: '配列内の値を比較し、必要に応じて交換しながら整列されるまでの状態変化を1ステップずつ確認します。'
+        }
+      ];
+
+      const sortMaterial = {
+        initial: [5, 2, 4, 1, 3]
+      };
+
+      const screens = [...document.querySelectorAll('.screen')];
+      const navButtons = [...document.querySelectorAll('.nav-btn')];
+      const materialList = document.getElementById('material-list');
+      const historyList = document.getElementById('history-list');
+
+      const bars = document.getElementById('bars');
+      const arrayView = document.getElementById('array-view');
+      const runStatus = document.getElementById('run-status');
+      const startBtn = document.getElementById('start-btn');
+      const stepBtn = document.getElementById('step-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const currentAction = document.getElementById('current-action');
+      const stepProgress = document.getElementById('step-progress');
+      const finalResult = document.getElementById('final-result');
+      const whyBlock = document.getElementById('why-block');
+      const insightBlock = document.getElementById('insight-block');
+
+      let state = createInitialRunState();
+
+      function createInitialRunState() {
+        const steps = buildSortSteps(sortMaterial.initial);
+        return {
+          array: [...sortMaterial.initial],
+          steps,
+          stepIndex: 0,
+          started: false,
+          completed: false,
+          highlight: [],
+          swapped: false
+        };
+      }
+
+      // プロトタイプ用の簡易教材ロジック。
+      // 固定配列に対して、隣接要素を比較して必要なら交換するステップ列を事前生成する。
+      function buildSortSteps(initial) {
+        const work = [...initial];
+        const steps = [];
+        for (let pass = 0; pass < work.length - 1; pass += 1) {
+          for (let i = 0; i < work.length - 1 - pass; i += 1) {
+            const left = work[i];
+            const right = work[i + 1];
+            const swapped = left > right;
+            if (swapped) {
+              work[i] = right;
+              work[i + 1] = left;
+            }
+            steps.push({
+              indices: [i, i + 1],
+              left,
+              right,
+              swapped,
+              result: [...work],
+              pass: pass + 1
+            });
+          }
+        }
+        return steps;
+      }
+
+      function showScreen(name) {
+        screens.forEach(screen => {
+          screen.classList.toggle('active', screen.dataset.screen === name);
+        });
+        navButtons.forEach(btn => {
+          const navTarget = btn.dataset.go;
+          const active = navTarget === name || (name === 'material' && navTarget === 'materials');
+          if (active) btn.setAttribute('aria-current', 'page');
+          else btn.removeAttribute('aria-current');
+        });
+
+        if (name === 'materials') renderMaterialList();
+        if (name === 'history') renderHistory();
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      }
+
+      function openMaterial(materialId) {
+        const material = materials.find(item => item.id === materialId);
+        if (!material) return;
+
+        saveLastOpened(materialId);
+        resetRun();
+        document.getElementById('material-title').textContent = material.name;
+        document.getElementById('material-field').textContent = material.field;
+        document.getElementById('material-summary').textContent = material.summary;
+        showScreen('material');
+      }
+
+      function renderMaterialList() {
+        materialList.innerHTML = materials.map(material => `
+          <article class="material-card">
+            <div>
+              <span class="tag">${escapeHtml(material.field)}</span>
+              <h2 style="margin-top:10px;">${escapeHtml(material.name)}</h2>
+              <p>${escapeHtml(material.summary)}</p>
+            </div>
+            <button class="btn btn-primary" data-open-material="${escapeHtml(material.id)}">教材を開く</button>
+          </article>
+        `).join('');
+      }
+
+      function saveLastOpened(materialId) {
+        const history = readHistory();
+        const withoutCurrent = history.filter(item => item.id !== materialId);
+        const next = [
+          { id: materialId, lastOpenedAt: new Date().toISOString() },
+          ...withoutCurrent
+        ];
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch (_) {
+          // file:// やプライバシー設定で保存が拒否されても、教材閲覧自体は継続する。
+        }
+      }
+
+      function readHistory() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return parsed.filter(item => item && typeof item.id === 'string' && typeof item.lastOpenedAt === 'string');
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function renderHistory() {
+        const history = readHistory();
+        if (!history.length) {
+          historyList.innerHTML = `
+            <div class="empty-state">
+              <h2>まだ学習履歴はありません</h2>
+              <p>教材を開くと、この端末内に最後に開いた日時が記録されます。</p>
+              <button class="btn btn-primary" data-go="materials">学習一覧へ</button>
+            </div>
+          `;
+          return;
+        }
+
+        historyList.innerHTML = history.map(item => {
+          const material = materials.find(m => m.id === item.id);
+          if (!material) return '';
+          return `
+            <article class="history-item">
+              <div>
+                <span class="tag">${escapeHtml(material.field)}</span>
+                <h2 style="margin:8px 0 2px;">${escapeHtml(material.name)}</h2>
+                <div class="history-time">最後に開いた日時：${escapeHtml(formatDateTime(item.lastOpenedAt))}</div>
+              </div>
+              <button class="btn btn-primary" data-open-material="${escapeHtml(material.id)}">もう一度開く</button>
+            </article>
+          `;
+        }).join('');
+      }
+
+      function formatDateTime(iso) {
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return '日時不明';
+        return new Intl.DateTimeFormat('ja-JP', {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit'
+        }).format(date);
+      }
+
+      function startRun() {
+        if (state.started) return;
+        state.started = true;
+        state.completed = false;
+        runStatus.textContent = '実行中';
+        runStatus.className = 'status-badge running';
+        startBtn.disabled = true;
+        stepBtn.disabled = false;
+        currentAction.innerHTML = `
+          <strong>処理を開始しました</strong>
+          <p>「1ステップ実行」を押して、最初の比較対象と状態変化を確認してください。</p>
+        `;
+      }
+
+      function executeStep() {
+        if (!state.started || state.completed) return;
+        const step = state.steps[state.stepIndex];
+        if (!step) {
+          finishRun();
+          return;
+        }
+
+        state.array = [...step.result];
+        state.highlight = [...step.indices];
+        state.swapped = step.swapped;
+        state.stepIndex += 1;
+
+        const [a, b] = step.indices;
+        const relation = step.left > step.right ? '大きい' : '小さい、または等しい';
+        const action = step.swapped ? '左の値が大きいため、2つの位置を交換しました。' : '順序は正しいため、交換しませんでした。';
+
+        currentAction.innerHTML = `
+          <strong>index ${a} と index ${b} を比較</strong>
+          <p>${step.left} と ${step.right} を比較しました。左の ${step.left} は右の ${step.right} より ${relation} ため、${action}</p>
+        `;
+
+        if (state.stepIndex >= state.steps.length) {
+          finishRun();
+        } else {
+          renderRun();
+        }
+      }
+
+      function finishRun() {
+        state.completed = true;
+        state.started = true;
+        state.array = [1, 2, 3, 4, 5];
+        state.highlight = [];
+        state.swapped = false;
+        runStatus.textContent = '完了';
+        runStatus.className = 'status-badge done';
+        stepBtn.disabled = true;
+        startBtn.disabled = true;
+        currentAction.innerHTML = `
+          <strong>すべての比較が完了しました</strong>
+          <p>配列は昇順に整列されました。下の解説で、なぜこの結果になるのかを確認してください。</p>
+        `;
+        renderRun();
+      }
+
+      function resetRun() {
+        state = createInitialRunState();
+        runStatus.textContent = '開始前';
+        runStatus.className = 'status-badge';
+        startBtn.disabled = false;
+        stepBtn.disabled = true;
+        currentAction.innerHTML = `
+          <strong>まだ処理は始まっていません</strong>
+          <p>初期状態を確認したら「処理を開始」を押してください。</p>
+        `;
+        finalResult.className = 'locked-block';
+        finalResult.textContent = '処理完了後に最終結果を表示します。';
+        whyBlock.className = 'locked-block';
+        whyBlock.textContent = '処理完了後に解説を表示します。';
+        insightBlock.className = 'locked-block';
+        insightBlock.textContent = '処理完了後に学習ポイントを表示します。';
+        renderRun();
+      }
+
+      function renderRun() {
+        const max = Math.max(...sortMaterial.initial);
+        bars.innerHTML = state.array.map((value, index) => {
+          let statusClass = '';
+          if (state.completed) statusClass = 'done';
+          else if (state.highlight.includes(index)) statusClass = state.swapped ? 'changed' : 'compare';
+          const height = Math.max(18, Math.round((value / max) * 82));
+          return `
+            <div class="bar-column">
+              <div class="bar ${statusClass}" style="height:${height}%;" aria-label="index ${index} の値 ${value}">
+                <span class="bar-value">${value}</span>
+              </div>
+              <div class="bar-index">index ${index}</div>
+            </div>
+          `;
+        }).join('');
+
+        arrayView.textContent = `[${state.array.join(', ')}]`;
+        stepProgress.textContent = `${state.stepIndex} / ${state.steps.length} ステップ`;
+
+        if (state.completed) {
+          finalResult.className = 'result-block';
+          finalResult.innerHTML = `<strong class="mono">[1, 2, 3, 4, 5]</strong><br>小さい値から大きい値の順に並びました。`;
+          whyBlock.className = 'result-block';
+          whyBlock.innerHTML = `隣り合う2つを順番に比較し、左の値が大きい場合だけ交換します。これを繰り返すことで、大きい値が右側へ移動し、最終的に全体が昇順になります。`;
+          insightBlock.className = 'result-block';
+          insightBlock.innerHTML = `最終結果だけを見るのではなく、各比較で「交換する／しない」を判断した積み重ねが整列につながることが分かります。処理途中の状態を見ることで、アルゴリズムの規則と結果の因果関係を追えます。`;
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      document.addEventListener('click', event => {
+        const goButton = event.target.closest('[data-go]');
+        if (goButton) {
+          showScreen(goButton.dataset.go);
+          return;
+        }
+
+        const materialButton = event.target.closest('[data-open-material]');
+        if (materialButton) {
+          openMaterial(materialButton.dataset.openMaterial);
+        }
+      });
+
+      startBtn.addEventListener('click', startRun);
+      stepBtn.addEventListener('click', executeStep);
+      resetBtn.addEventListener('click', resetRun);
+
+      renderMaterialList();
+      renderRun();
+      showScreen('home');
+    })();
+  </script>
+</body>
+</html>
