@@ -75,6 +75,9 @@ npm run build
 
 ## Completion
 
+If application code changed, require a new formal Reviewer pass.
+Do not change the Task status and do not proceed directly to Finalizer.
+
 Report:
 
 1. fixed Critical / High findings
@@ -82,4 +85,3 @@ Report:
 3. verification results
 4. remaining Critical / High
 5. untouched Medium / Low
-

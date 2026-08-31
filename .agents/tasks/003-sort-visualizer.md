@@ -143,8 +143,12 @@ architecture.mdにより以下は確定済み。
 
 ## Unblock Condition
 
-上記Open Decisionsが確定し、
-このTaskの `Confirmed Decisions` へ反映された時点で、
+以下をすべて満たした時点で、
+
+- 上記Open Decisionsが確定し、このTaskの `Confirmed Decisions` へ反映されている
+- 依存TaskがすべてDoneである
+- 必要なSource of Truth更新が完了している
+- Source of Truth間に実装判断へ影響する矛盾がない
 
 ```text
 Status: Ready
@@ -184,4 +188,3 @@ Status: Ready
 ```text
 .agents/reviews/003-sort-visualizer-review.md
 ```
-

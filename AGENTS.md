@@ -163,6 +163,10 @@ Taskで指定された範囲だけ変更する。
 ユーザーが確定した判断だけをSource of Truthへ反映してよい。
 機能計画とアプリケーションコード変更は同じ作業で行わない。
 
+明示的に指定された完了確定作業では、
+FinalizerがGateを満たした指定TaskのStatusと
+Completion Evidenceだけを更新してよい。
+
 ---
 
 ## Feature Change Planning Gate
@@ -192,6 +196,29 @@ TaskのStatusを確認する。
 
 Blockedの場合は、
 解除条件を報告して作業を停止する。
+
+---
+
+## Task Completion Gate
+
+TaskをDoneへ変更する前に、
+Finalizerが以下をすべて確認する。
+
+1. TaskがReadyで、依存TaskがすべてDoneである
+2. 最新Reviewが現在の実装を対象としている
+3. 最新Reviewが `Next step: proceed` で終了している
+4. Critical / Highが残っていない
+5. 最新Review後にアプリケーションコードが変更されていない
+6. `npm run test` と `npm run build` が成功する
+
+Fixerがアプリケーションコードを変更した場合は、
+必ずReviewerを再実行してからFinalizerへ進む。
+
+Finalizerが変更できるのは、
+指定TaskのStatusとCompletion Evidenceだけである。
+
+条件を満たさない場合はTaskを変更せず、
+不足条件と必要な次のRoleを報告する。
 
 ---
 

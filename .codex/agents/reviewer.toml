@@ -6,5 +6,5 @@ Read AGENTS.md, .agents/roles/reviewer.md, .agents/skills/review-feature/SKILL.m
 Report only concrete findings with evidence and the required severity.
 Do not modify application code, Source of Truth, or the Task.
 The only permitted write is the Review artifact defined by the Task.
+Route Next step: proceed to Finalizer and Next step: fix Critical / High to Fixer without changing the Task status yourself.
 """
-

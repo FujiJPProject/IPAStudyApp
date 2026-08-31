@@ -75,6 +75,7 @@ project/
 │  │  ├─ builder.md
 │  │  ├─ reviewer.md
 │  │  ├─ fixer.md
+│  │  ├─ finalizer.md
 │  │  └─ release-auditor.md
 │  │
 │  ├─ skills/
@@ -87,6 +88,8 @@ project/
 │  │  ├─ review-feature/
 │  │  │  └─ SKILL.md
 │  │  ├─ fix-review/
+│  │  │  └─ SKILL.md
+│  │  ├─ finalize-task/
 │  │  │  └─ SKILL.md
 │  │  ├─ integration-review/
 │  │  │  └─ SKILL.md
@@ -108,6 +111,7 @@ project/
 │     ├─ builder.toml
 │     ├─ reviewer.toml
 │     ├─ fixer.toml
+│     ├─ finalizer.toml
 │     └─ release-auditor.toml
 │
 ├─ src/ -- 現在の実装状態
@@ -163,6 +167,7 @@ planner         → 機能変更計画、Source of Truth更新、Task準備
 builder         → Ready Taskの実装
 reviewer        → 機能レビュー
 fixer           → Critical / High修正
+finalizer       → 最終Review・test・build確認後のTask完了確定
 release_auditor → 統合・デプロイ可否レビュー
 ```
 
@@ -187,8 +192,8 @@ Task:
 結果をAGENTS.mdの形式で統合して報告してください。
 ```
 
-Phase 5〜7は順番に行い、builder、reviewer、fixerを
-同時に起動しない。
+Phase 5〜7と完了確定は順番に行い、
+builder、reviewer、fixer、finalizerを同時に起動しない。
 
 ---
 
@@ -778,6 +783,10 @@ Critical / Highだけを必要最小限で修正してください。
 Medium / Lowは変更しないでください。
 ```
 
+Fixerがアプリケーションコードを変更した場合は、
+Phase 6のReviewerを必ず再実行する。
+Reviewerが `Next step: proceed` と判断するまでFinalizerへ進まない。
+
 ---
 
 # 15. Phase 8：機能追加を繰り返す
@@ -785,7 +794,7 @@ Medium / Lowは変更しないでください。
 ## 目的
 
 機能の追加・変更・削除ごとに、実装前の計画Gateを通したうえで、
-「機能実装 → レビュー → Critical / High修正 → テスト」のサイクルを繰り返す。
+「機能実装 → レビュー → Critical / High修正 → 再レビュー → 完了確定」のサイクルを繰り返す。
 
 Phase 8では、最初に実装を依頼しない。
 Source of Truthへの影響と未確定事項を整理し、
@@ -818,6 +827,7 @@ Taskは `.agents/tasks/TEMPLATE.md` をもとに作成または更新する。
 計画・Task準備：GPT-5.6 Terra
 通常の実装・修正：GPT-5.6 Terra
 通常レビュー：GPT-5.6 Terra
+Task完了確定：GPT-5.6 LunaまたはTerra
 重要な設計判断・重要レビュー：GPT-5.6 Sol
 ```
 
@@ -852,9 +862,15 @@ Phase 5：Builderによる実装
 ↓
 Phase 6：Reviewerによるレビュー
 ↓
-Phase 7：FixerによるCritical / High修正
+Critical / Highがある場合はPhase 7：Fixerによる修正
+↓
+Fixerが変更した場合はPhase 6：Reviewerを再実行
+↓
+最終ReviewのNext step: proceedを確認
 ↓
 npm run test / npm run build
+↓
+Phase 8-D：FinalizerがStatus: Doneへ変更
 ```
 
 未確定事項が残る場合は、TaskをBlockedのままにし、実装へ進まない。
@@ -913,6 +929,17 @@ TaskをReadyにできるのは、以下をすべて満たす場合だけ。
 - 必要なSource of Truth更新が完了している
 - 資料間に実装判断へ影響する矛盾がない
 - Scope、Out of Scope、Allowed Changes、Acceptance Criteriaが明確である
+
+TaskをDoneにできるのは、以下をすべて満たす場合だけ。
+
+- TaskがReadyで、依存TaskがすべてDone
+- 最新Reviewが現在の実装を対象としている
+- 最新Reviewが `Next step: proceed` で終了している
+- Critical / Highが残っていない
+- 最新Review後にアプリケーションコードが変更されていない
+- `npm run test` と `npm run build` が成功している
+
+Doneへの変更はFinalizerだけが行う。
 
 ---
 
@@ -1093,7 +1120,7 @@ Candidate Reference：
 Source of Truth、Task、アプリケーションコードを変更しないでください。
 
 plannerの結果を待ち、要点を統合して報告してください。
-builder、reviewer、fixerはまだ起動しないでください。
+builder、reviewer、fixer、finalizerはまだ起動しないでください。
 ```
 
 回答確定後は、同じplannerへPhase 8-Bの内容を委譲する。
@@ -1107,11 +1134,82 @@ TaskがReadyになった後、以下を別作業として順番に実施する�
 1. Phase 5のBuilderプロンプトで実装する
 2. Phase 6のReviewerプロンプトでレビューする
 3. Critical / Highがある場合だけPhase 7のFixerプロンプトで修正する
-4. 修正後に必要ならPhase 6を再実行する
-5. `npm run test` と `npm run build` の成功を確認する
+4. Fixerがコードを変更した場合はPhase 6を必ず再実行する
+5. 最新Reviewが現在の実装を対象とし、`Next step: proceed` で終了していることを確認する
+6. `npm run test` と `npm run build` の成功を確認する
 
 実装・レビュー・修正では同じTaskを参照する。
 Phase 8-A / 8-BとPhase 5〜7を1回のプロンプトで同時実行しない。
+
+---
+
+## Phase 8-D：Task完了確定
+
+Phase 8-Cの最終Reviewが完了した後、別作業として実施する。
+
+Finalizerは実装・レビュー・修正を行わない。
+完了Gateを検証し、条件をすべて満たす場合だけ、
+指定TaskのStatusとCompletion Evidenceを更新する。
+
+### ChatGPT Work用プロンプト
+
+```text
+AGENTS.mdを確認してください。
+
+今回はFinalizerとして作業してください。
+
+Role:
+.agents/roles/finalizer.md
+
+Skill:
+.agents/skills/finalize-task/SKILL.md
+
+Task:
+.agents/tasks/[task].md
+
+Review:
+.agents/reviews/[review].md
+
+# 目的
+
+最新Reviewが現在の実装を対象としており、
+Next step: proceedで終了していることを確認してください。
+
+npm run testとnpm run buildを実行し、
+すべての完了条件を満たす場合だけ、
+指定TaskをReadyからDoneへ変更してください。
+
+# 制約
+
+- アプリケーションコードとテストを変更しないでください
+- Source of Truthを変更しないでください
+- Review成果物を変更しないでください
+- Taskの要件・Scope・Acceptance Criteriaを変更しないでください
+- 指定TaskのStatusとCompletion Evidence以外を変更しないでください
+- Fixerの変更後にReviewerが再実行されていない場合は停止してください
+- 条件を満たさない場合はTaskを変更せず、不足条件を報告してください
+```
+
+### Codex用プロンプト
+
+```text
+AGENTS.mdを確認してください。
+
+カスタムエージェントfinalizerに、
+.agents/skills/finalize-task/SKILL.mdに従って
+次のTaskの完了確定を委譲してください。
+
+Task:
+.agents/tasks/[task].md
+
+Review:
+.agents/reviews/[review].md
+
+完了条件をすべて満たす場合だけ、
+指定TaskのStatusとCompletion Evidenceを更新してください。
+
+finalizerの完了を待ち、結果を統合して報告してください。
+```
 
 ## 完了条件
 
@@ -1124,8 +1222,13 @@ Phase 8-A / 8-BとPhase 5〜7を1回のプロンプトで同時実行しない�
 - [ ] TaskのStatusがGateに従っている
 - [ ] TaskがReadyになるまで実装していない
 - [ ] 実装・レビュー・修正を別作業として実施した
+- [ ] Fixerがコードを変更した場合にReviewerを再実行した
+- [ ] 最新Reviewが現在の実装を対象としている
+- [ ] 最新Reviewが `Next step: proceed` で終了している
 - [ ] `npm run test` が成功した
 - [ ] `npm run build` が成功した
+- [ ] Finalizerが完了Gateを確認した
+- [ ] TaskがDoneになり、Completion Evidenceが記録された
 
 ---
 
@@ -1522,19 +1625,28 @@ ChatGPT Work（基本）
      ├─ アプリ基盤
      │
      ├─ 機能A
+     │    ├─ 計画・質問・Source of Truth更新
+     │    ├─ Task準備・Ready確認
      │    ├─ 実装
      │    ├─ レビュー
-     │    └─ 修正
+     │    ├─ 必要なら修正・再レビュー
+     │    └─ FinalizerによるDone確定
      │
      ├─ 機能B
+     │    ├─ 計画・質問・Source of Truth更新
+     │    ├─ Task準備・Ready確認
      │    ├─ 実装
      │    ├─ レビュー
-     │    └─ 修正
+     │    ├─ 必要なら修正・再レビュー
+     │    └─ FinalizerによるDone確定
      │
      ├─ 機能C
+     │    ├─ 計画・質問・Source of Truth更新
+     │    ├─ Task準備・Ready確認
      │    ├─ 実装
      │    ├─ レビュー
-     │    └─ 修正
+     │    ├─ 必要なら修正・再レビュー
+     │    └─ FinalizerによるDone確定
      │
      ▼
 統合レビュー
@@ -1570,13 +1682,17 @@ AI開発では、
 ↓
 設計
 ↓
+Task準備
+↓
 実装
 ↓
 レビュー
 ↓
-修正
+必要なら修正・再レビュー
 ↓
 テスト
+↓
+Finalizerによる完了確定
 ```
 
 という工程を守ることを優先する。

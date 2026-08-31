@@ -23,9 +23,11 @@ AGENTS.mdおよびTaskで定義された制約を維持する。
 │  ├─ builder.md
 │  ├─ reviewer.md
 │  ├─ fixer.md
+│  ├─ finalizer.md
 │  └─ release-auditor.md
 ├─ skills/
 │  ├─ plan-feature-change/
+│  ├─ finalize-task/
 │  └─ ...
 ├─ tasks/
 └─ reviews/
@@ -56,11 +58,14 @@ ChatGPT Work上で自動生成される独立Agentを意味しない。
 
 Taskごとに、
 
+- Status
+- Depends On
 - Objective
 - Scope
 - Out of Scope
 - Allowed Changes
 - Acceptance Criteria
+- Completion Evidence
 
 を持つ。
 
@@ -193,6 +198,37 @@ test / build
 
 ---
 
+## Finalization Flow
+
+Fixerがコードを変更した場合は、
+先にReviewerを再実行する。
+
+```text
+AGENTS.md
++
+roles/finalizer.md
++
+skills/finalize-task/SKILL.md
++
+tasks/<task>.md
++
+reviews/<task>-review.md
+↓
+最新Reviewが現在の実装を対象としていることを確認
+↓
+Next step: proceedを確認
+↓
+test / build
+↓
+TaskのStatusとCompletion Evidenceだけを更新
+↓
+Status: Done
+```
+
+条件を満たさない場合、FinalizerはTaskを変更しない。
+
+---
+
 ## Integration Flow
 
 MVP機能完成後：
@@ -236,6 +272,10 @@ Source of Truthを変更できるのは、
 Plannerが未確定事項を質問し、ユーザーが確定した後の
 機能計画作業だけである。
 
+TaskをDoneへ変更できるのは、
+Finalizerが完了Gateを確認した完了確定作業だけである。
+Finalizerは指定TaskのStatusとCompletion Evidence以外を変更しない。
+
 ---
 
 ## Codex Custom Agents
@@ -248,6 +288,7 @@ planner         → 機能変更の計画・Source of Truth更新・Task準備
 builder         → Ready Taskの実装
 reviewer        → 機能単位レビュー
 fixer           → Critical / High修正
+finalizer       → 最終Review・test・build確認後のTask完了確定
 release_auditor → 統合・デプロイ可否レビュー
 ```
 

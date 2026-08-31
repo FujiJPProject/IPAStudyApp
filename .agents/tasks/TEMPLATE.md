@@ -27,6 +27,15 @@ Allowed values:
 - 必要なSource of Truth更新が完了している
 - Source of Truth間に実装判断へ影響する矛盾がない
 
+以下をすべて満たす場合のみFinalizerがDoneへ変更する。
+
+- TaskがReadyで、依存TaskがすべてDone
+- 最新Reviewが現在の実装を対象としている
+- 最新Reviewが `Next step: proceed` で終了している
+- Critical / Highが残っていない
+- 最新Review後にアプリケーションコードが変更されていない
+- `npm run test` と `npm run build` が成功している
+
 ## Depends On
 
 - [dependency-task-id]
@@ -148,6 +157,20 @@ Readyの場合は `なし。` と書く。
 - [ ] `npm run test` が成功する
 - [ ] `npm run build` が成功する
 - [ ] 既存機能を壊していない
+
+---
+
+## Completion Evidence
+
+FinalizerがDoneへ変更するときに記載する。
+
+```text
+Final Review: .agents/reviews/[task-id]-review.md
+Review Decision: Next step: proceed
+Verification: npm run test / npm run build succeeded
+```
+
+ReadyまたはBlockedの場合は `未完了。` と書く。
 
 ---
 

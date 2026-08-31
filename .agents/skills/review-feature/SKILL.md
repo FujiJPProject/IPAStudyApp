@@ -165,3 +165,6 @@ or:
 Next step: fix Critical / High
 ```
 
+Route `Next step: proceed` to Finalizer.
+Route `Next step: fix Critical / High` to Fixer.
+Do not change the Task status in this Skill.
