@@ -25,12 +25,12 @@ MVP機能を順番に追加できる最低限のVueアプリ基盤を構築す�
 
 ## Source of Truth
 
-- `docs/requirements.md`
-- `docs/architecture.md`
+- `doc/requirements.md`
+- `doc/architecture.md`
 
 基本UIを確認する必要がある場合のみ：
 
-- `docs/ui-reference.html`
+- `doc/ui-reference.html`
 
 ---
 
@@ -156,3 +156,4 @@ tests/**
 ```text
 .agents/reviews/001-foundation-review.md
 ```
+

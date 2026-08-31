@@ -11,14 +11,14 @@ Read:
 
 1. `AGENTS.md`
 2. `.agents/roles/release-auditor.md`
-3. `docs/requirements.md`
-4. `docs/architecture.md`
+3. `doc/requirements.md`
+4. `doc/architecture.md`
 5. current repository
 6. package.json
 7. package-lock.json
 8. relevant feature Reviews
 
-Read `docs/ui-reference.html` for UI and learning-flow verification.
+Read `doc/ui-reference.html` for UI and learning-flow verification.
 
 ---
 
@@ -138,3 +138,4 @@ Conclude with:
 - MVP releaseable: Yes / No
 - mandatory fixes before release
 - deferrable improvements
+

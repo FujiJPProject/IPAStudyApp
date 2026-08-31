@@ -11,12 +11,12 @@ Read:
 
 1. `AGENTS.md`
 2. `.agents/roles/builder.md`
-3. `docs/requirements.md`
-4. `docs/architecture.md`
+3. `doc/requirements.md`
+4. `doc/architecture.md`
 5. the specified Task
 6. relevant existing code
 
-Read `docs/ui-reference.html` only when the Task affects UI or UX.
+Read `doc/ui-reference.html` only when the Task affects UI or UX.
 
 ---
 
@@ -113,3 +113,4 @@ Do not perform the formal Review in this same task.
 
 When implementation and verification are complete,
 report only the Work Output defined in `AGENTS.md`.
+

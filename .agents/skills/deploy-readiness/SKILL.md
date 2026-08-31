@@ -11,7 +11,7 @@ Read:
 
 1. `AGENTS.md`
 2. `.agents/roles/release-auditor.md`
-3. `docs/architecture.md`
+3. `doc/architecture.md`
 4. package.json
 5. package-lock.json
 6. vite.config.ts if present
@@ -175,3 +175,4 @@ Include:
 - Critical / High / Medium / Low findings
 - mandatory changes before deployment
 - Cloudflare Pages configuration values
+

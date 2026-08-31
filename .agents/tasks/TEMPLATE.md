@@ -4,9 +4,13 @@
 
 [task-id]
 
+## Change Type
+
+[Add | Modify | Delete]
+
 ## Status
 
-Ready
+Blocked
 
 Allowed values:
 
@@ -14,10 +18,21 @@ Allowed values:
 - Blocked
 - Done
 
+新規Taskは原則としてBlockedから開始する。
+
+以下をすべて満たす場合のみReadyへ変更する。
+
+- 重要なOpen Decisionsがない
+- 依存TaskがすべてDone
+- 必要なSource of Truth更新が完了している
+- Source of Truth間に実装判断へ影響する矛盾がない
+
 ## Depends On
 
 - [dependency-task-id]
 - none
+
+依存Taskがない場合は `none` だけを書く。
 
 ---
 
@@ -29,12 +44,34 @@ Allowed values:
 
 ## Source of Truth
 
-- `docs/requirements.md`
-- `docs/architecture.md`
+- `doc/requirements.md`
+- `doc/architecture.md`
 
 UIに関係する場合のみ：
 
-- `docs/ui-reference.html`
+- `doc/ui-reference.html`
+
+---
+
+## Source of Truth Impact
+
+Plannerが今回の変更による影響と反映結果を書く。
+
+```text
+requirements.md: [Updated | No change] - [理由]
+ui-reference.html: [Updated | No change] - [理由]
+architecture.md: [Updated | No change] - [理由]
+```
+
+---
+
+## Candidate References
+
+採用前のHTML、モック、メモ等がある場合だけ記載する。
+
+- [参照名またはパス]
+
+Candidate Reference自体はSource of Truthではない。
 
 ---
 
@@ -91,6 +128,16 @@ Status: Blocked
 ```
 
 とする。
+
+未確定事項がない場合は `なし。` と書く。
+
+---
+
+## Unblock Condition
+
+Blockedの場合、Readyへ変更するために必要な判断・更新を書く。
+
+Readyの場合は `なし。` と書く。
 
 ---
 

@@ -44,9 +44,9 @@ MVP教材である
 
 ## Source of Truth
 
-- `docs/requirements.md`
-- `docs/architecture.md`
-- `docs/ui-reference.html`
+- `doc/requirements.md`
+- `doc/architecture.md`
+- `doc/ui-reference.html`
 
 `ui-reference.html` の具体的なJavaScript処理を
 確定仕様として扱わない。
@@ -184,3 +184,4 @@ Status: Ready
 ```text
 .agents/reviews/003-sort-visualizer-review.md
 ```
+

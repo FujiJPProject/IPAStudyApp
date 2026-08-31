@@ -62,7 +62,7 @@ HTMLだけを仕様として利用しない。
 project/
 ├─ AGENTS.md
 │
-├─ docs/
+├─ doc/
 │  ├─ requirements.md -- 機能要件・MVP範囲のSource of Truth
 │  ├─ architecture.md -- 実装方式・責務分離・データ構造のSource of Truth
 │  └─ ui-reference.html -- UI・画面表現・操作イメージのSource of Truth
@@ -71,12 +71,15 @@ project/
 │  ├─ README.md
 │  │
 │  ├─ roles/
+│  │  ├─ planner.md
 │  │  ├─ builder.md
 │  │  ├─ reviewer.md
 │  │  ├─ fixer.md
 │  │  └─ release-auditor.md
 │  │
 │  ├─ skills/
+│  │  ├─ plan-feature-change/
+│  │  │  └─ SKILL.md
 │  │  ├─ foundation/
 │  │  │  └─ SKILL.md
 │  │  ├─ implement-feature/
@@ -98,7 +101,15 @@ project/
 │  │
 │  └─ reviews/
 │     └─ TEMPLATE.md
-││
+│
+├─ .codex/
+│  └─ agents/
+│     ├─ planner.toml
+│     ├─ builder.toml
+│     ├─ reviewer.toml
+│     ├─ fixer.toml
+│     └─ release-auditor.toml
+│
 ├─ src/ -- 現在の実装状態
 ├─ package.json
 └─ README.md -- 開発・起動方法
@@ -119,6 +130,65 @@ UI仕様
 ```
 
 資料間に矛盾がある場合は、AIが勝手に解釈して実装を進めない。矛盾箇所を報告し、要件に関わる判断が必要な場合は確認事項として提示する。
+
+### Candidate Referenceの扱い
+
+機能ごとに作成したHTML、モック、メモ、参考実装等は、
+Source of TruthではなくCandidate Referenceとして扱う。
+
+Candidate Referenceからは、
+
+- 画面要素
+- 操作
+- 状態変化
+- 説明内容
+- 実装候補
+
+を抽出してよい。
+
+ただし、Source of Truthと異なる内容を自動採用しない。
+相違点を質問し、ユーザーが採用を確定した後に、
+責務を持つSource of Truthへ反映する。
+
+### RoleとCodex Custom Agentの使い分け
+
+ChatGPT Workでは、`.agents/roles/*.md` を
+プロンプトから明示的に指定する。
+
+Codexでは、`.codex/agents/*.toml` の
+カスタムエージェントへ対象作業を明示的に委譲する。
+
+```text
+planner         → 機能変更計画、Source of Truth更新、Task準備
+builder         → Ready Taskの実装
+reviewer        → 機能レビュー
+fixer           → Critical / High修正
+release_auditor → 統合・デプロイ可否レビュー
+```
+
+`.agents/skills/*/SKILL.md` と `.agents/tasks/*.md` は、
+WorkとCodexの両方で共通の作業手順・要求として利用する。
+
+Codexへ委譲する場合の基本形：
+
+```text
+AGENTS.mdを確認してください。
+
+カスタムエージェント[agent-name]に、
+以下のSkillとTaskに従う作業を委譲してください。
+
+Skill:
+.agents/skills/[skill-name]/SKILL.md
+
+Task:
+.agents/tasks/[task].md
+
+対象エージェントの完了を待ち、
+結果をAGENTS.mdの形式で統合して報告してください。
+```
+
+Phase 5〜7は順番に行い、builder、reviewer、fixerを
+同時に起動しない。
 
 ---
 
@@ -353,7 +423,7 @@ ChatGPT Plus
 成果物：
 
 ```text
-docs/requirements.md
+doc/requirements.md
 ```
 
 ---
@@ -425,7 +495,7 @@ HTML / CSS / JavaScriptを1ファイルにまとめてください。
 成果物：
 
 ```text
-docs/ui-reference.html
+doc/ui-reference.html
 ```
 
 ---
@@ -511,7 +581,7 @@ Vue 3 + TypeScript + Viteで実装するための
 成果物：
 
 ```text
-docs/architecture.md
+doc/architecture.md
 ```
 
 ---
@@ -714,39 +784,45 @@ Medium / Lowは変更しないでください。
 
 ## 目的
 
-1機能ごとに「機能実装 → レビュー → Critical / High修正 → テスト」のサイクルを繰り返し、既存品質を維持しながらMVP機能を順番に追加する。
+機能の追加・変更・削除ごとに、実装前の計画Gateを通したうえで、
+「機能実装 → レビュー → Critical / High修正 → テスト」のサイクルを繰り返す。
 
-例：
+Phase 8では、最初に実装を依頼しない。
+Source of Truthへの影響と未確定事項を整理し、
+必要な資料更新とTask準備が完了してからPhase 5〜7へ進む。
 
-```text
-ソート可視化
-↓
-レビュー
-↓
-修正
-↓
-問題演習
-↓
-レビュー
-↓
-修正
-↓
-学習履歴
-↓
-レビュー
-↓
-修正
-```
+## 仮定への結論
+
+### 仮定1
+
+「Phase 8でPhase 5〜7を行う前にTaskが必要」は条件付きで正しい。
+
+- 新しい機能追加・既存機能の仕様変更・機能削除では、原則として実装前にTaskを準備する
+- 対応するTaskが既にある場合は、同じ機能のTaskを重複作成せず既存Taskを更新する
+- Phase 6のレビューとPhase 7の修正では、実装時と同じTaskを参照する
+- レビューごと、修正ごとに新しいTaskを作成する必要はない
+
+Taskは `.agents/tasks/TEMPLATE.md` をもとに作成または更新する。
+
+### 仮定2
+
+「変更内容によっては `doc/` のSource of Truthも更新する必要がある」は正しい。
+
+ただし、資料を先に推測で変更してはならない。
+変更要求とCandidate Referenceを分析し、疑問点をユーザーへ質問し、
+回答が確定した後に必要なSource of Truthだけを更新する。
 
 ## 推奨モデル
 
 ```text
-実装・修正：GPT-5.6 Terra
+計画・Task準備：GPT-5.6 Terra
+通常の実装・修正：GPT-5.6 Terra
 通常レビュー：GPT-5.6 Terra
-重要レビュー：GPT-5.6 Sol
+重要な設計判断・重要レビュー：GPT-5.6 Sol
 ```
 
-軽微な実装・修正ではGPT-5.6 Lunaも利用できる。GPT-5.6 Solはアーキテクチャへの影響が大きいレビューや複雑な問題に限定する。
+軽微で明確なTask準備や修正ではGPT-5.6 Lunaも利用できる。
+Source of Truth間の複雑な矛盾や大きなアーキテクチャ変更を扱う場合のみGPT-5.6 Solを利用する。
 
 ## 推奨環境
 
@@ -755,55 +831,301 @@ Medium / Lowは変更しないでください。
 必要時のみ：Codex（デスクトップ）
 ```
 
-## プロンプト例
+## Phase 8の全体フロー
 
 ```text
-次のMVP機能として「[機能名]」を追加してください。
+変更要求・Candidate Reference
+↓
+Plannerによる差分・影響分析
+↓
+未確定事項をユーザーへ質問
+↓
+回答確定
+↓
+必要なSource of Truthを更新
+↓
+Taskを新規作成または更新
+↓
+Status: Readyを確認
+↓
+Phase 5：Builderによる実装
+↓
+Phase 6：Reviewerによるレビュー
+↓
+Phase 7：FixerによるCritical / High修正
+↓
+npm run test / npm run build
+```
 
-Phase 5〜7のルールに従い、まず今回の機能だけを実装してください。
+未確定事項が残る場合は、TaskをBlockedのままにし、実装へ進まない。
 
-# コンテキスト
+## Source of Truth更新判定
 
-・requirements.md
-・architecture.md
-・現在のリポジトリ
-・必要に応じてui-reference.html
+| 変更内容 | 更新候補 |
+| --- | --- |
+| MVP範囲、機能要件、画面責務、学習体験、完了条件 | `doc/requirements.md` |
+| 画面構成、情報配置、操作、レスポンシブ表示、見せ方 | `doc/ui-reference.html` |
+| 実装方式、責務分離、データ構造、状態管理、永続化、テスト方針 | `doc/architecture.md` |
+| 上記を変えない実装詳細だけ | Source of Truth変更なし |
 
-# 今回のスコープ
+複数の責務へ影響する場合は複数ファイルを更新してよい。
+更新順序は原則として以下とする。
 
-[実装内容]
+1. requirements.mdで機能・範囲を確定する
+2. UI変更がある場合はui-reference.htmlへ反映する
+3. 実装設計変更がある場合はarchitecture.mdへ反映する
+4. 最後にTaskを作成または更新する
 
-# スコープ外
+Source of Truthを変更しない場合も、Taskの `Source of Truth Impact` に理由を書く。
 
-・今回対象ではないMVP機能
-・将来機能
-・architecture.mdの変更
-・requirements.mdの変更
+## HTMLを利用する場合の推奨方法
+
+`sort_algorithm_visualizer.html` のようなAI生成HTMLは、そのまま実装仕様として渡さない。
+
+推奨する扱いは以下。
+
+1. HTMLをCandidate ReferenceとしてPlannerへ渡す
+2. UI要素、操作、状態、説明、実装候補を抽出させる
+3. requirements.md、architecture.md、ui-reference.html、既存Taskとの差分を出させる
+4. 差分ごとに採用するかユーザーへ質問させる
+5. 採用が確定した内容だけをSource of Truthへ反映する
+6. 確定したSource of TruthをもとにTaskを作成または更新する
+
+HTMLのDOM構造、CSS、JavaScript、利用ライブラリは、
+本番実装へそのまま移植しない。
+
+例えば、Candidate Referenceに複数アルゴリズム、自動再生、速度変更が存在しても、
+現在のMVPやTaskで対象外なら自動採用しない。
+
+## Task作成・更新ルール
+
+- 追加・変更・削除のいずれでも、実装単位を明確にする必要がある場合はTaskを使う
+- 既存Taskと目的が一致する場合は、そのTaskのConfirmed Decisions等を更新する
+- 新規Taskの場合だけ、既存IDと重複しない次のIDを付ける
+- 新規Taskは原則Blockedから開始する
+- Candidate Referenceは `Candidate References` に記載し、Source of Truthと区別する
+- 重要な未確定事項は `Open Decisions` に残し、解除条件を `Unblock Condition` に書く
+
+TaskをReadyにできるのは、以下をすべて満たす場合だけ。
+
+- 重要なOpen Decisionsがない
+- 依存TaskがすべてDone
+- 必要なSource of Truth更新が完了している
+- 資料間に実装判断へ影響する矛盾がない
+- Scope、Out of Scope、Allowed Changes、Acceptance Criteriaが明確である
+
+---
+
+## Phase 8-A：差分・影響分析と質問
+
+この段階ではファイルを変更しない。
+
+### ChatGPT Work用プロンプト
+
+```text
+AGENTS.mdを確認してください。
+
+今回はPlannerとして作業してください。
+
+Role:
+.agents/roles/planner.md
+
+Skill:
+.agents/skills/plan-feature-change/SKILL.md
+
+Task Template:
+.agents/tasks/TEMPLATE.md
+
+# 目的
+
+次の機能追加・変更・削除について、
+実装前の差分・影響分析と仕様確定に必要な質問を行ってください。
+
+# 変更要求
+
+[追加・変更・削除したい内容]
+
+# Candidate Reference
+
+[添付HTML、保存済みHTML、モック、メモ等。なければ「なし」]
+
+# 必ず確認するもの
+
+- doc/requirements.md
+- doc/architecture.md
+- UIに関係する場合はdoc/ui-reference.html
+- 関連する既存Task
+- 関連する現在のコード
 
 # 制約
 
-・既存機能を壊さない
-・1機能の責務を必要以上に広げない
-・既存アーキテクチャを維持する
-・変更範囲を必要最小限にする
+- Candidate ReferenceはSource of Truthではありません
+- Source of Truthとの差分を自動採用しないでください
+- 重要な疑問点を推測で確定しないでください
+- 対応する既存Taskがある場合は重複Taskを提案しないでください
+- この段階ではファイルを変更しないでください
+- アプリケーションコードを実装しないでください
 
-# 完了条件
+# 出力
 
-□ 対象機能が要件どおり動作する
-□ npm run build が成功する
-□ npm run test が成功する
-□ 既存機能を壊していない
+1. 変更種別（Add / Modify / Delete）
+2. 変更要求の要約
+3. Source of Truthとの差分・矛盾
+4. Candidate Referenceから抽出した候補
+5. requirements.mdへの影響候補と理由
+6. ui-reference.htmlへの影響候補と理由
+7. architecture.mdへの影響候補と理由
+8. 既存Taskの有無
+9. ユーザーが回答すべき質問
+10. 回答確定後に変更する予定のファイル
+
+質問がある場合は、回答を受けるまでファイル変更へ進まないでください。
+```
+
+### `sort_algorithm_visualizer.html` を渡す場合の追記例
+
+```text
+Candidate Referenceとしてsort_algorithm_visualizer.htmlを確認してください。
+
+HTMLに含まれる機能や操作を自動採用せず、
+.agents/tasks/003-sort-visualizer.mdと
+doc/requirements.md、doc/architecture.md、doc/ui-reference.htmlの
+差分を一覧化してください。
+
+特に以下は採用済みとみなさず、必要なら質問してください。
+
+- 採用するソートアルゴリズム
+- 複数アルゴリズム切替
+- 自動再生・一時停止
+- 速度変更
+- シャッフル
+- 1ステップの単位
+- 比較・交換・確定状態
+- 変数表示
+- フローチャート
+- Why / Insightの内容
+
+既存の003-sort-visualizer.mdがあるため、
+新しい重複Taskは作成しないでください。
+```
+
+---
+
+## Phase 8-B：確定内容の反映とTask準備
+
+Phase 8-Aの質問へユーザーが回答した後に使用する。
+
+### ChatGPT Work用プロンプト
+
+```text
+AGENTS.mdを確認してください。
+
+今回はPlannerとして作業してください。
+
+Role:
+.agents/roles/planner.md
+
+Skill:
+.agents/skills/plan-feature-change/SKILL.md
+
+Task Template:
+.agents/tasks/TEMPLATE.md
+
+# 確定した回答
+
+[Phase 8-Aで確定した回答]
+
+# 目的
+
+確定した回答だけを反映し、
+必要なSource of Truthを先に更新した後、
+実装用Taskを新規作成または更新してください。
+
+# 手順
+
+1. 確定した回答とSource of Truthを再確認する
+2. requirements.mdへの影響を判定し、必要な場合だけ更新する
+3. UI変更がある場合だけui-reference.htmlを更新する
+4. architecture.mdへの影響を判定し、必要な場合だけ更新する
+5. Source of Truth間の矛盾がないか再確認する
+6. 対応する既存Taskがあるか確認する
+7. 既存Taskがあれば更新し、なければTEMPLATE.mdから新規作成する
+8. Task StatusをGateに従って設定する
+
+# 制約
+
+- 確定していない内容を追加しないでください
+- Source of Truth変更が不要な場合はTaskへNo changeと理由を記載してください
+- 既存Taskと同じ目的のTaskを重複作成しないでください
+- アプリケーションコードを変更しないでください
+- Phase 5〜7は実施しないでください
 
 # 作業後の報告
 
-1. 変更ファイル
-2. 実装内容
-3. テスト結果
-4. 未解決事項
-
-このプロンプトでは実装だけを行い、レビューやレビュー指摘修正は実施しないでください。
-実装完了後、Phase 6とPhase 7のプロンプトを別タスクとして使用します。
+1. 確定事項
+2. 更新したSource of Truthと理由
+3. 作成または更新したTask
+4. Task Statusと理由
+5. 残っている未確定事項
 ```
+
+---
+
+## CodexでPlannerを利用するプロンプト
+
+```text
+AGENTS.mdを確認してください。
+
+カスタムエージェントplannerに、
+.agents/skills/plan-feature-change/SKILL.mdに従って
+今回の機能変更計画を委譲してください。
+
+変更要求：
+[追加・変更・削除したい内容]
+
+Candidate Reference：
+[参照。なければ「なし」]
+
+まず差分・影響分析だけを行わせ、
+未確定事項があれば質問を返して停止してください。
+
+回答が確定するまでは、
+Source of Truth、Task、アプリケーションコードを変更しないでください。
+
+plannerの結果を待ち、要点を統合して報告してください。
+builder、reviewer、fixerはまだ起動しないでください。
+```
+
+回答確定後は、同じplannerへPhase 8-Bの内容を委譲する。
+
+---
+
+## Phase 8-C：Phase 5〜7を実行
+
+TaskがReadyになった後、以下を別作業として順番に実施する。
+
+1. Phase 5のBuilderプロンプトで実装する
+2. Phase 6のReviewerプロンプトでレビューする
+3. Critical / Highがある場合だけPhase 7のFixerプロンプトで修正する
+4. 修正後に必要ならPhase 6を再実行する
+5. `npm run test` と `npm run build` の成功を確認する
+
+実装・レビュー・修正では同じTaskを参照する。
+Phase 8-A / 8-BとPhase 5〜7を1回のプロンプトで同時実行しない。
+
+## 完了条件
+
+- [ ] Candidate ReferenceとSource of Truthを区別している
+- [ ] 未確定事項をユーザーへ質問した
+- [ ] 確定前にSource of TruthやTaskを変更していない
+- [ ] 必要なSource of Truthだけを更新した
+- [ ] 対応するTaskを新規作成または更新した
+- [ ] 既存Taskを重複作成していない
+- [ ] TaskのStatusがGateに従っている
+- [ ] TaskがReadyになるまで実装していない
+- [ ] 実装・レビュー・修正を別作業として実施した
+- [ ] `npm run test` が成功した
+- [ ] `npm run build` が成功した
 
 ---
 

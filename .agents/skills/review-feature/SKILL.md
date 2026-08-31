@@ -11,13 +11,13 @@ Read:
 
 1. `AGENTS.md`
 2. `.agents/roles/reviewer.md`
-3. `docs/requirements.md`
-4. `docs/architecture.md`
+3. `doc/requirements.md`
+4. `doc/architecture.md`
 5. the specified Task
 6. current implementation
 7. related tests
 
-Read `docs/ui-reference.html` when UI behavior is part of the Task.
+Read `doc/ui-reference.html` when UI behavior is part of the Task.
 
 ---
 
@@ -164,3 +164,4 @@ or:
 ```text
 Next step: fix Critical / High
 ```
+

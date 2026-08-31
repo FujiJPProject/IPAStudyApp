@@ -19,7 +19,14 @@ AGENTS.mdおよびTaskで定義された制約を維持する。
 ```text
 .agents/
 ├─ roles/
+│  ├─ planner.md
+│  ├─ builder.md
+│  ├─ reviewer.md
+│  ├─ fixer.md
+│  └─ release-auditor.md
 ├─ skills/
+│  ├─ plan-feature-change/
+│  └─ ...
 ├─ tasks/
 └─ reviews/
 ```
@@ -85,10 +92,44 @@ Task
 =
 今回の具体的要求
 
+Candidate Reference
+=
+採用前のHTML・モック・メモ等
+
 Review
 =
 レビュー結果
 ```
+
+---
+
+## Planning Flow
+
+Phase 8で機能を追加・変更・削除する場合は、
+実装より先にPlannerを使用する。
+
+```text
+AGENTS.md
++
+roles/planner.md
++
+skills/plan-feature-change/SKILL.md
++
+tasks/TEMPLATE.md
++
+変更要求・Candidate Reference
+↓
+Source of Truthとの差分と影響範囲を整理
+↓
+未確定事項をユーザーへ質問
+↓
+確定後に必要なSource of Truthを更新
+↓
+Taskを新規作成または更新
+```
+
+Plannerはアプリケーションコードを変更しない。
+既存Taskがある場合は重複作成しない。
 
 ---
 
@@ -189,4 +230,26 @@ Cloudflare Pagesデプロイ可否確認
 - リポジトリ全体を横断するデバッグ
 
 Codexへ切り替えても、
-requirements.md・architecture.md・Taskの内容は変更しない。
+requirements.md・architecture.md・Taskを勝手に変更しない。
+
+Source of Truthを変更できるのは、
+Plannerが未確定事項を質問し、ユーザーが確定した後の
+機能計画作業だけである。
+
+---
+
+## Codex Custom Agents
+
+Codexでは、プロジェクト用カスタムエージェントを
+`.codex/agents/*.toml` から利用する。
+
+```text
+planner         → 機能変更の計画・Source of Truth更新・Task準備
+builder         → Ready Taskの実装
+reviewer        → 機能単位レビュー
+fixer           → Critical / High修正
+release_auditor → 統合・デプロイ可否レビュー
+```
+
+カスタムエージェントは自動実行を前提とせず、
+Codexへのプロンプトで対象名とTaskを明示して委譲する。

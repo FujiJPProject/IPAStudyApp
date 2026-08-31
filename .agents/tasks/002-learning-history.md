@@ -25,9 +25,9 @@ MVPで必要な最小限の学習履歴機能を実装する。
 
 ## Source of Truth
 
-- `docs/requirements.md`
-- `docs/architecture.md`
-- `docs/ui-reference.html`
+- `doc/requirements.md`
+- `doc/architecture.md`
+- `doc/ui-reference.html`
 
 ---
 
@@ -178,3 +178,4 @@ Storage障害：
 ```text
 .agents/reviews/002-learning-history-review.md
 ```
+
