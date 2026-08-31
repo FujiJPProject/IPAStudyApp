@@ -1,10 +1,14 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../../src/App.vue'
 import { routes } from '../../src/router'
 
 describe('application routes', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
   it.each([
     ['/', '処理を1ステップずつ進めて'],
     ['/materials', 'ソートアルゴリズム可視化'],

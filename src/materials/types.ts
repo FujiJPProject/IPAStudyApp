@@ -11,3 +11,8 @@ export interface MaterialDefinition {
   metadata: MaterialMetadata
   component: Component
 }
+
+export interface LearningHistoryEntry {
+  materialId: string
+  lastOpenedAt: string
+}

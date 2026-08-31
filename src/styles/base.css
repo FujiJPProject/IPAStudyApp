@@ -250,6 +250,32 @@ p {
   box-shadow: 0 7px 20px rgb(23 32 51 / 4%);
 }
 
+.history-list {
+  display: grid;
+  gap: 16px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 22px;
+  box-shadow: 0 7px 20px rgb(23 32 51 / 4%);
+}
+
+.history-item h2 {
+  margin: 8px 0 2px;
+}
+
+.history-time {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+}
+
 .material-card h2,
 .material-title {
   margin-top: 10px;
@@ -331,8 +357,13 @@ p {
     grid-template-columns: 1fr;
   }
 
-  .material-card .button {
+  .material-card .button,
+  .history-item .button {
     width: 100%;
+  }
+
+  .history-item {
+    grid-template-columns: 1fr;
   }
 }
 
