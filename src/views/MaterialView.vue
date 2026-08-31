@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { findMaterialDefinition } from '../materials/definitions'
+import { recordMaterialOpened } from '../services/historyService'
 
 const route = useRoute()
 
@@ -11,6 +12,16 @@ const materialId = computed(() => {
 })
 
 const definition = computed(() => findMaterialDefinition(materialId.value ?? ''))
+
+watch(
+  definition,
+  (currentDefinition) => {
+    if (currentDefinition) {
+      recordMaterialOpened(currentDefinition.metadata.id)
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
