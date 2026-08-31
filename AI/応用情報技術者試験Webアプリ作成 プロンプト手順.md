@@ -60,11 +60,45 @@ HTMLだけを仕様として利用しない。
 
 ```text
 project/
+├─ AGENTS.md
+│
 ├─ docs/
 │  ├─ requirements.md -- 機能要件・MVP範囲のSource of Truth
 │  ├─ architecture.md -- 実装方式・責務分離・データ構造のSource of Truth
 │  └─ ui-reference.html -- UI・画面表現・操作イメージのSource of Truth
 │
+├─ .agents/
+│  ├─ README.md
+│  │
+│  ├─ roles/
+│  │  ├─ builder.md
+│  │  ├─ reviewer.md
+│  │  ├─ fixer.md
+│  │  └─ release-auditor.md
+│  │
+│  ├─ skills/
+│  │  ├─ foundation/
+│  │  │  └─ SKILL.md
+│  │  ├─ implement-feature/
+│  │  │  └─ SKILL.md
+│  │  ├─ review-feature/
+│  │  │  └─ SKILL.md
+│  │  ├─ fix-review/
+│  │  │  └─ SKILL.md
+│  │  ├─ integration-review/
+│  │  │  └─ SKILL.md
+│  │  └─ deploy-readiness/
+│  │     └─ SKILL.md
+│  │
+│  ├─ tasks/
+│  │  ├─ TEMPLATE.md
+│  │  ├─ 001-foundation.md
+│  │  ├─ 002-learning-history.md
+│  │  └─ 003-sort-visualizer.md
+│  │
+│  └─ reviews/
+│     └─ TEMPLATE.md
+││
 ├─ src/ -- 現在の実装状態
 ├─ package.json
 └─ README.md -- 開発・起動方法
@@ -508,62 +542,25 @@ Codexは、Workでの実装・テスト・原因調査で解決できない場�
 ## プロンプト例
 
 ```text
-添付されているrequirements.mdとarchitecture.mdに基づき、
-Webアプリの基盤だけ実装してください。
+AGENTS.mdを確認してください。
 
-# 今回のスコープ
+今回はBuilderとして作業してください。
 
-・Vite
-・Vue 3
-・TypeScript
-・Vue Router（複数画面を持つ場合）
-・基本ルーティング
-・共通レイアウト
-・レスポンシブ対応の基本CSS
-・必要最低限のテスト環境
-・npm run testでVitestが1回実行されて終了するテストスクリプト
-・設計書で定義されたディレクトリ構成
+Role:
+.agents/roles/builder.md
 
-# スコープ外
+Skill:
+.agents/skills/foundation/SKILL.md
 
-今回は以下を実装しないでください。
+Task:
+.agents/tasks/001-foundation.md
 
-・各教材機能
-・学習履歴
-・分析
-・認証
-・DB
-・本番用API
-・高度なアニメーション
-・将来機能の先回り実装
+上記と必要なSource of Truthを読んでから、
+Taskの範囲だけ実装してください。
 
-# 制約
+Task外の実装や設計変更は行わないでください。
 
-・architecture.mdをSource of Truthとする
-・必要以上のライブラリを追加しない
-・既存設計を勝手に変更しない
-・後から機能を追加できる最低限の構造にする
-
-# 完了条件
-
-□ npm install が成功する
-□ npm run dev が成功する
-□ npm run build が成功する
-□ npm run test が成功する
-□ npm run preview で本番ビルドを確認できる
-□ 基本画面をブラウザで表示できる
-
-# 作業後の報告
-
-コード全文は回答に貼らないでください。
-
-以下のみ報告してください。
-
-1. 変更ファイル
-2. 実装内容
-3. 実行したコマンド
-4. テスト結果
-5. 未解決事項
+完了後はAGENTS.mdで指定された形式だけ報告してください。
 ```
 
 ---
@@ -594,63 +591,23 @@ GPT-5.6 Terra
 ## プロンプト例
 
 ```text
-今回のタスクは
-「[機能名]」の実装だけです。
+AGENTS.mdを確認してください。
 
-# コンテキスト
+今回はBuilderとして作業してください。
 
-・requirements.md
-・architecture.md
-・現在のリポジトリ
-・添付HTML
+Role:
+.agents/roles/builder.md
 
-添付HTMLはUI仕様として利用してください。
+Skill:
+.agents/skills/implement-feature/SKILL.md
 
-HTMLそのものをコピーして実装する必要はありません。
+Task:
+.agents/tasks/[task].md
 
-# 今回のスコープ
+TaskのStatusと依存Taskを最初に確認してください。
 
-[実装内容]
-
-# スコープ外
-
-今回は以下を変更・実装しないでください。
-
-[対象外機能]
-
-# 実装上の制約
-
-・既存アーキテクチャを維持する
-・既存機能を壊さない
-・UIとロジックを適切に分離する
-・必要以上の抽象化を行わない
-・スマートフォン表示を考慮する
-・変更範囲を可能な限り限定する
-・新規ライブラリは必要な場合のみ追加する
-
-# 変更してよい範囲
-
-[ディレクトリ・ファイル]
-
-# 完了条件
-
-□ 要件どおり動作する
-□ PC表示で問題がない
-□ スマートフォン幅で問題がない
-□ npm run build が成功する
-□ npm run test が成功する
-□ 既存機能を壊していない
-
-# 作業後の報告
-
-コード全文は回答に貼らないでください。
-
-以下のみ報告してください。
-
-1. 変更ファイル
-2. 実装内容
-3. テスト結果
-4. 未解決事項
+Readyの場合のみ実装し、
+完了後はnpm run testとnpm run buildを実行してください。
 ```
 
 ---
@@ -676,71 +633,32 @@ GPT-5.6 Terra
 ```text
 基本：ChatGPT Work（デスクトップでローカルフォルダを使用）
 必要時のみ：Codex（デスクトップ）
+
+※別Workチャット
 ```
 
 ## プロンプト例
 
 ```text
-今回はコードレビューだけを行ってください。
+AGENTS.mdを確認してください。
 
-コードの変更はしないでください。
+今回はReviewerとして作業してください。
 
-# レビュー対象
+Role:
+.agents/roles/reviewer.md
 
-[今回追加した機能]
+Skill:
+.agents/skills/review-feature/SKILL.md
 
-# 仕様
+Task:
+.agents/tasks/[task].md
 
-requirements.md
-architecture.md
+現在の実装をレビューしてください。
 
-をSource of Truthとして確認してください。
+アプリケーションコードは変更しないでください。
 
-# レビュー観点
-
-以下を確認してください。
-
-□ 要件を満たしているか
-□ architecture.mdに反していないか
-□ 責務分離できているか
-□ 不要な変更が入っていないか
-□ 重複コードがないか
-□ 過剰設計になっていないか
-□ スマートフォン対応できているか
-□ 将来拡張を妨げないか
-□ エラー処理に問題がないか
-□ TypeScriptの型安全性に問題がないか
-□ Vueのprops / emits / reactive stateの責務が不自然でないか
-□ 再利用可能なロジックを無理なくcomposableへ分離できているか
-□ テスト不足がないか
-□ セキュリティ上の問題がないか
-□ パフォーマンス上の明確な問題がないか
-
-# 出力形式
-
-問題を以下に分類してください。
-
-Critical
-High
-Medium
-Low
-
-各指摘について、
-
-・対象ファイル
-・問題箇所
-・問題の理由
-・修正方針
-
-を記載してください。
-
-問題がない項目は無理に指摘しないでください。
-
-最後に、
-
-「現状のまま次の機能実装へ進んでよいか」
-
-を判定してください。
+レビュー結果だけ、
+Taskで指定された.agents/reviews/配下へ保存してください。
 ```
 
 ---
@@ -769,43 +687,25 @@ GPT-5.6 Terra
 ## プロンプト例
 
 ```text
-添付されているコードレビュー結果をもとに修正してください。
+AGENTS.mdを確認してください。
 
-# 修正対象
+今回はFixerとして作業してください。
 
-Critical
-High
+Role:
+.agents/roles/fixer.md
 
-のみ修正してください。
+Skill:
+.agents/skills/fix-review/SKILL.md
 
-# 今回修正しないもの
+Task:
+.agents/tasks/[task].md
 
-Medium
-Low
+Review:
+.agents/reviews/[review].md
 
-については変更しないでください。
+Critical / Highだけを必要最小限で修正してください。
 
-# 制約
-
-・レビュー指摘と関係のないコードを変更しない
-・既存アーキテクチャを変更しない
-・リファクタリング範囲を必要最低限にする
-・新しい機能を追加しない
-
-# 完了条件
-
-□ Criticalが解消されている
-□ Highが解消されている
-□ npm run build が成功する
-□ npm run test が成功する
-□ 既存機能を壊していない
-
-# 作業後の報告
-
-1. 修正した指摘
-2. 変更ファイル
-3. テスト結果
-4. 未対応のMedium / Low
+Medium / Lowは変更しないでください。
 ```
 
 ---
@@ -929,52 +829,20 @@ GPT-5.6 Sol
 ## プロンプト例
 
 ```text
-MVP機能の実装が完了しました。
+AGENTS.mdを確認してください。
 
-今回はアプリ全体の統合レビューだけをしてください。
+今回はRelease Auditorとして作業してください。
 
-まだコード変更はしないでください。
+Role:
+.agents/roles/release-auditor.md
 
-# Source of Truth
+Skill:
+.agents/skills/integration-review/SKILL.md
 
-requirements.md
-architecture.md
+requirements.mdとarchitecture.mdを基準として、
+現在のMVP全体をレビューしてください。
 
-# 確認項目
-
-□ MVP要件をすべて満たしている
-□ 未実装機能がない
-□ 画面遷移に問題がない
-□ 機能同士の責務が明確
-□ データ構造に矛盾がない
-□ UIとロジックが分離されている
-□ データ保存層が分離されている
-□ PC表示に問題がない
-□ スマートフォン表示に問題がない
-□ TypeScriptエラーがない
-□ npm run build が成功する
-□ npm run test が成功する
-□ Vue Routerを含む画面遷移が直接URLアクセスでも破綻しない構成になっている
-□ 不要な依存ライブラリがない
-□ セキュリティ上の問題がない
-□ Cloudflare Pagesへデプロイ可能な状態になっている
-
-# 出力
-
-Critical
-High
-Medium
-Low
-
-で問題を分類してください。
-
-最後に、
-
-・MVPとしてリリース可能か
-・リリース前に必須の修正
-・リリース後でもよい修正
-
-を示してください。
+アプリケーションコードは変更しないでください。
 ```
 
 ---
@@ -1015,66 +883,21 @@ GPT-5.6 Terra
 ## プロンプト例
 
 ```text
-このWebアプリをCloudflare Pagesへデプロイする前提で、
-デプロイ可能な状態か確認してください。
+AGENTS.mdを確認してください。
 
-今回はレビューとローカル確認のみ行い、Cloudflare Pagesへの実際のデプロイ操作、Cloudflare設定変更、GitHubへのpushは行わないでください。
+今回はRelease Auditorとして作業してください。
 
-# デプロイ前提
+Role:
+.agents/roles/release-auditor.md
 
-・ホスティング先：Cloudflare Pages
-・ソース管理：GitHub
-・Production branch：main
-・Build command：npm run build
-・Build output directory：dist
-・MVPではPages Functions等のサーバーサイド機能を利用しない
+Skill:
+.agents/skills/deploy-readiness/SKILL.md
 
-# 確認項目
+Cloudflare Pagesへデプロイ可能な状態か確認してください。
 
-□ package-lock.jsonが存在する
-□ npm ci が成功する
-□ npm run test が成功する
-□ npm run build が成功する
-□ npm run preview で本番ビルドを確認できる
-□ distが生成される
-□ dist直下にindex.htmlが存在する
-□ Cloudflare PagesのBuild commandをnpm run buildに設定できる
-□ Cloudflare PagesのBuild output directoryをdistに設定できる
-□ Viteのbase設定がCloudflare Pagesのルート配信に適した設定になっている
-□ Vue Routerをhistory modeで利用する場合、Cloudflare PagesのSPAフォールバックで直接URLアクセスできる構成になっている
-□ SPAフォールバックを妨げる意図しないトップレベル404.htmlが生成されていない
-□ 本番環境で問題になるアセットパス・相対パスがない
-□ 開発環境固有の設定が残っていない
-□ 秘密情報やローカル専用情報がコード・Git管理対象ファイルに含まれていない
-□ .gitignoreが適切に設定されている
-□ 不要なconsole.logやデバッグ用コードが残っていない
-□ PCで利用できる
-□ スマートフォンで利用できる
-□ READMEにnpm ci / npm run dev / npm run test / npm run buildの手順が記載されている
-□ READMEにCloudflare PagesのBuild commandとBuild output directoryが記載されている
-
-問題があれば、
-
-Critical
-High
-Medium
-Low
-
-で分類してください。
-
-最後に、
-
-・現時点でCloudflare Pagesへデプロイ可能か
-・デプロイ前に必須の修正
-・デプロイ後でもよい修正
-・Cloudflare Pages側で設定すべき値
-
-を示してください。
-
-デプロイ可能と判断した場合も、実際のデプロイは行わないでください。
+実際のデプロイ、GitHubへのpush、
+Cloudflare側設定変更は行わないでください。
 ```
-
-Critical / Highを解消し、Cloudflare Pagesへデプロイ可能と判定された時点で本手順は完了とする。実際のデプロイ操作は別途実施する。
 
 ---
 
