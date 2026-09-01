@@ -35,37 +35,48 @@ flowchart TD
 
 ### Role(役割)
 
+- **orchestrator**
+  - Codexのメインスレッドとして状態遷移とユーザー対話を管理する
+  - カスタムエージェントとしては作成しない
+- **planner**
+  - 実装前の仕様確定、Source of Truth更新、Task準備を担当する
 - **builder**
-  - 実装担当。方針や設計、指定されたタスク外、
-  - 自分の書いたコードを正しいと思い込ませないため直させないレビューはさせない
+  - `Ready` Taskの実装だけを担当し、正式Reviewは行わない
 - **reviewer**
-  - レビュー専任。
-  - コードは直さない
+  - 機能単位レビュー専任で、アプリケーションコードは変更しない
 - **fixer**
-  - レビュー指摘の修正専任
-  - 変更範囲を広げやすいためCritical / Highだけを修正対象と制限させる
+  - Reviewで確認されたCritical / Highの修正だけを担当する
+- **finalizer**
+  - 完了Gateを確認し、指定TaskのStatusとCompletion Evidenceだけを更新する
 - **release-auditor**
-  - アプリ全体・リリース可能性を見る担当
-  - 動作確認はするがアプリコードは変更しない
+  - アプリ全体またはデプロイ可否を確認し、アプリケーションコードは変更しない
+
+### Codex専用Custom Agent
+
+- **workflow_analyst**
+  - Codexで独立した読み取り専用調査を担当し、成果物は書き込まない
+  - 対応する`.agents/roles/*.md`は持たず、ChatGPT WorkのRoleとして扱わない
 
 ### Skill(手順)
 
 - **foundation**
-  - Phase 4専用:Vueアプリ基盤だけを作る手順
-  - アプリ基盤作成は通常の機能追加と少し性質が違うため最初の1回だけ使用
+  - プロンプト手順のPhase 4でVueアプリ基盤だけを作る
+- **orchestrate-feature-cycle**
+  - CodexでPlanからFinalizeまでの状態遷移、Gate、停止・再開を管理する
+- **plan-feature-change**
+  - 実装前の差分・影響分析、質問、確定内容の反映、Task準備を行う
 - **implement-feature**
-  - Phase 5以降の通常の機能実装手順
-  - 仕様未確定のまま勝手に実装されるのを防ぐ考慮
+  - `Ready` TaskのBuildを行う
 - **review-feature**
-  - Phase 6の機能単位レビュー手順
-  - レビュー結果を.agents/reviews/xxx-review.mdへ保存
+  - 機能単位のReviewを行い、結果を`.agents/reviews/<task>-review.md`へ保存する
 - **fix-review**
-  - Phase 7のレビュー修正手順
-  - Reviewerの指摘が間違っている場合無理に修正しないようにしている
+  - ReviewerのCritical / High指摘を検証し、必要最小限のFixを行う
+- **finalize-task**
+  - 最新Reviewと検証結果を確認し、条件を満たすTaskを`Done`にする
 - **integration-review**
-  - Phase 9専用で個別Taskではなく、MVP全体を横断して確認します
+  - プロンプト手順のPhase 9でMVP全体を横断して確認する
 - **deploy-readiness**
-  - Phase 10専用。Cloudflare Pagesへデプロイ可能かだけ確認
+  - プロンプト手順のPhase 10でCloudflare Pagesへのデプロイ可否を確認する
 
 ### Tasks(今回の作業)
 

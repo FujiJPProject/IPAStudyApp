@@ -1,6 +1,6 @@
 ---
 name: implement-feature
-description: Implement one Ready feature Task while preserving requirements.md and architecture.md. Use for Phase 5 and repeated feature implementation work in ChatGPT Work or Codex.
+description: Implement one Ready feature Task while preserving requirements.md and architecture.md. Use for Build work in ChatGPT Work or Codex.
 ---
 
 # Implement Feature

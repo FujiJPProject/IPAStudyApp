@@ -42,7 +42,7 @@ and relevant current diff after every handoff.
 Delegate to `planner` using `plan-feature-change`.
 
 During Analyze Without Writing, limited parallel investigation is optional.
-Use at most two read-only agents only when there are at least two material,
+Use at most two `workflow_analyst` agents only when there are at least two material,
 independent investigation lanes, such as:
 
 - Source of Truth and Candidate Reference differences
@@ -72,15 +72,11 @@ decision, stop and ask the user instead of widening the Task.
 
 Delegate to `reviewer` using `review-feature` after Builder completes.
 
-Use one Reviewer by default. Treat the review as important only when at least one
-of the following applies:
+Use one Reviewer by default.
+Determine whether the review is important using the criteria in
+`review-feature`'s Review Rule.
 
-- the change crosses architecture or shared-code boundaries
-- the change spans multiple features or Source of Truth responsibilities
-- state, persistence, security, or broad regression risk is material
-- the parent cannot obtain adequate confidence from one focused review
-
-For an important review, run at most two non-overlapping read-only review lanes.
+For an important review, run at most two non-overlapping `workflow_analyst` review lanes.
 The lane agents must not write the Review artifact. After they finish, delegate
 one designated Reviewer to validate and consolidate the findings into the single
 Review path defined by the Task.
@@ -110,13 +106,12 @@ the required next Role.
 
 ## Parallel Execution Rules
 
-Keep Phase 5 through Phase 8 state transitions sequential.
+Keep Plan through Finalize state transitions sequential.
 
 Parallel work is optional and restricted to:
 
 - Planner read-only investigation: maximum 2 concurrent agents
 - important feature-review investigation: maximum 2 concurrent agents
-- Phase 9 read-only integration-review investigation: maximum 3 concurrent agents
 
 Never parallelize:
 
@@ -144,7 +139,8 @@ Stop before the next phase when any of the following applies:
 - two Fixer-to-Reviewer cycles have completed without `proceed`
 
 Ask one consolidated set of questions. Do not expose duplicate questions or raw
-subagent logs to the user.
+subagent logs to the user. After the user answers, resume the same parent thread
+from the stopped Gate and pass only the confirmed decisions to the next Role.
 
 ## Output
 

@@ -1,10 +1,8 @@
 name = "finalizer"
-description = "Marks one reviewed Task Done only after the latest Review covers the current implementation, concludes proceed, and tests and build succeed."
+description = "Marks one reviewed Task Done only after every completion Gate is satisfied."
 developer_instructions = """
-Work as this repository's Finalizer.
-Read AGENTS.md, .agents/roles/finalizer.md, .agents/skills/finalize-task/SKILL.md, the specified Task, its dependency Tasks, and its latest Review.
-Require the Task to be Ready, every dependency to be Done, the latest Review to cover the current implementation and conclude exactly Next step: proceed, and npm run test and npm run build to succeed.
-If application code changed after the latest Review, stop and require a new Reviewer pass.
-Do not modify application code, tests, Source of Truth, Review artifacts, or Task requirements.
-The only permitted write is changing the specified Task from Ready to Done and adding or updating its Completion Evidence.
+Read AGENTS.md and .agents/roles/finalizer.md completely.
+Use .agents/skills/finalize-task/SKILL.md, the Task, dependencies, and latest Review specified by the parent.
+Stay within the Finalizer Role write boundary.
+Only update the specified Task Status and Completion Evidence when every Gate passes; otherwise return the missing Gate to the parent.
 """

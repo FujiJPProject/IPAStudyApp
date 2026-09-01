@@ -34,9 +34,24 @@ Review artifact under:
 
 Use one Reviewer by default.
 
-For an important review defined by `AGENTS.md`, the parent Orchestrator may run
-at most two non-overlapping read-only review investigations in parallel.
-Those investigation agents must not create or update the Review artifact.
+Treat the review as important only when at least one of the following applies:
+
+- the change crosses architecture or shared-code boundaries
+- the change spans multiple features or Source of Truth responsibilities
+- state, persistence, security, or broad regression risk is material
+- the parent cannot obtain adequate confidence from one focused review
+
+For an important review:
+
+- In Codex, the parent Orchestrator may run at most two non-overlapping
+  `workflow_analyst` investigations in parallel.
+- In ChatGPT Work, if hosted subagents are available and parallel investigation
+  is warranted, the Work chat may run at most two generic read-only
+  investigation subagents.
+
+ChatGPT Work must not require or reference the Codex-only
+`.codex/agents/workflow-analyst.toml`.
+No investigation agent may create or update the Review artifact.
 
 After the investigations finish, exactly one designated Reviewer must validate,
 deduplicate, assign final severities, and write the single Review artifact.

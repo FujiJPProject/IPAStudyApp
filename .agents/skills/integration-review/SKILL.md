@@ -24,14 +24,22 @@ Read `doc/ui-reference.html` for UI and learning-flow verification.
 
 ## Parallel Investigation
 
-The parent Orchestrator may run at most three non-overlapping read-only
-investigations in parallel for Phase 9, for example:
+When this Skill is orchestrated in Codex, the parent Orchestrator may run at
+most three non-overlapping `workflow_analyst` investigations in parallel.
+
+When this Skill is run manually in ChatGPT Work, use one Release Auditor by
+default. If hosted subagents are available and parallel investigation is
+warranted, the Work chat may run at most three generic read-only investigation
+subagents. ChatGPT Work must not require or reference the Codex-only
+`.codex/agents/workflow-analyst.toml`.
+
+Example investigation lanes are:
 
 - requirements, routing, and feature integration
 - architecture, state ownership, and persistence
 - tests, UI, responsive behavior, and release risks
 
-Investigation agents must not modify files.
+Investigation agents must not modify files or write Review artifacts.
 After they finish, exactly one designated Release Auditor validates and
 consolidates the results into the integration Review artifact.
 

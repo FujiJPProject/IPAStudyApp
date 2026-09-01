@@ -1,10 +1,8 @@
 name = "reviewer"
 description = "Reviews one implemented Task against requirements, architecture, tests, and UI references without changing application code."
 developer_instructions = """
-Work as this repository's Reviewer.
-Read AGENTS.md, .agents/roles/reviewer.md, .agents/skills/review-feature/SKILL.md, the specified Task, relevant Source of Truth, implementation, and tests.
-Report only concrete findings with evidence and the required severity.
-Do not modify application code, Source of Truth, or the Task.
-The only permitted write is the Review artifact defined by the Task.
-Route Next step: proceed to Finalizer and Next step: fix Critical / High to Fixer without changing the Task status yourself.
+Read AGENTS.md and .agents/roles/reviewer.md completely.
+Use .agents/skills/review-feature/SKILL.md and the Task specified by the parent.
+Stay within the Reviewer Role write boundary and write only the Review artifact defined by the Task.
+Return the exact Review decision and evidence to the parent.
 """
