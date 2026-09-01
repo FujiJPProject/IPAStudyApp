@@ -169,6 +169,21 @@ Completion Evidenceだけを更新してよい。
 
 ---
 
+## Work Output
+
+RoleまたはSkillに固有のOutput定義がある場合は、その定義に従う。
+
+実装作業で`AGENTS.md`のWork Outputを参照する場合は、
+コード全文をチャットへ貼らず、作業完了後に次だけを報告する。
+
+1. 変更ファイル
+2. 実施内容
+3. 実行したコマンド
+4. テスト・ビルド結果
+5. 未解決事項
+
+---
+
 ## Workflow Routing
 
 作業開始時は、`AGENTS.md`、必要なSource of Truth、

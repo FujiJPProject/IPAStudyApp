@@ -34,8 +34,15 @@ Review artifact under:
 
 Use one Reviewer by default.
 
-For an important review defined by `AGENTS.md`, the parent Orchestrator may run
-at most two non-overlapping read-only review investigations in parallel.
+Treat the review as important only when at least one of the following applies:
+
+- the change crosses architecture or shared-code boundaries
+- the change spans multiple features or Source of Truth responsibilities
+- state, persistence, security, or broad regression risk is material
+- the parent cannot obtain adequate confidence from one focused review
+
+For an important review, the parent Orchestrator may run at most two
+non-overlapping `workflow_analyst` investigations in parallel.
 Those investigation agents must not create or update the Review artifact.
 
 After the investigations finish, exactly one designated Reviewer must validate,

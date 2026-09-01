@@ -72,13 +72,9 @@ decision, stop and ask the user instead of widening the Task.
 
 Delegate to `reviewer` using `review-feature` after Builder completes.
 
-Use one Reviewer by default. Treat the review as important only when at least one
-of the following applies:
-
-- the change crosses architecture or shared-code boundaries
-- the change spans multiple features or Source of Truth responsibilities
-- state, persistence, security, or broad regression risk is material
-- the parent cannot obtain adequate confidence from one focused review
+Use one Reviewer by default.
+Determine whether the review is important using the criteria in
+`review-feature`'s Review Rule.
 
 For an important review, run at most two non-overlapping `workflow_analyst` review lanes.
 The lane agents must not write the Review artifact. After they finish, delegate

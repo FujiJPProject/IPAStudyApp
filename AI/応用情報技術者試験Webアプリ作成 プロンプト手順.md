@@ -867,7 +867,36 @@ TaskがReadyまたはBlockedになった時点で停止し、
 
 ### Build以降
 
-Taskが`Ready`になった後、Phase 5〜7の手動プロンプトを使用する。
+Taskが`Ready`になった後は、Phase番号ではなく次の対応を使用する。
+
+| 工程 | Role | Skill | 追加コンテキスト | 次工程 |
+| --- | --- | --- | --- | --- |
+| Build | `.agents/roles/builder.md` | `.agents/skills/implement-feature/SKILL.md` | 対象Task | Review |
+| Review | `.agents/roles/reviewer.md` | `.agents/skills/review-feature/SKILL.md` | 対象Taskと現在の実装 | `proceed`ならFinalize、Critical / HighならFix |
+| Fix | `.agents/roles/fixer.md` | `.agents/skills/fix-review/SKILL.md` | 対象Taskと正式Review | 必ずRe-review |
+| Finalize | `.agents/roles/finalizer.md` | `.agents/skills/finalize-task/SKILL.md` | 対象Taskと最新Review | Gateを満たした場合だけDone |
+
+ChatGPT Workで個別工程を実行する場合は、次のテンプレートを使用する。
+
+```text
+AGENTS.mdを確認してください。
+
+Role:
+[上表のRoleパス]
+
+Skill:
+[上表のSkillパス]
+
+Task:
+.agents/tasks/[task].md
+
+Review:
+[FixまたはFinalizeの場合だけ正式Reviewパス。その他は「なし」]
+
+上記を完全に読んでから、指定された1工程だけを実行してください。
+次工程は実行せず、Skillが定義する成果物と検証結果を報告してください。
+```
+
 Fixerがアプリケーションコードを変更した場合は必ずReviewerへ戻る。
 最終Reviewが`Next step: proceed`になった後、
 `finalizer` Roleと`finalize-task` Skillを別工程として実行する。
