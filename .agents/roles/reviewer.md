@@ -26,3 +26,7 @@
 - レビュー中のついで修正
 
 Review成果物以外のファイルは変更しない。
+
+`Next step: fix Critical / High` の場合はFixerへ渡す。
+`Next step: proceed` の場合はFinalizerへ渡す。
+Reviewer自身はTaskをDoneへ変更しない。

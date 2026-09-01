@@ -11,8 +11,8 @@ Read:
 
 1. `AGENTS.md`
 2. `.agents/roles/fixer.md`
-3. `docs/requirements.md`
-4. `docs/architecture.md`
+3. `doc/requirements.md`
+4. `doc/architecture.md`
 5. the original Task
 6. the specified Review
 7. relevant current code and tests
@@ -74,6 +74,9 @@ npm run build
 ---
 
 ## Completion
+
+If application code changed, require a new formal Reviewer pass.
+Do not change the Task status and do not proceed directly to Finalizer.
 
 Report:
 

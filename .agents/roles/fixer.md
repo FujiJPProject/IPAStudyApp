@@ -25,3 +25,8 @@ Reviewで指摘された問題を
 - 不要なリファクタリング
 
 修正後はテストとビルドを実行する。
+
+アプリケーションコードを変更した場合は、
+必ずReviewerを再実行する。
+Reviewerが `Next step: proceed` と判断するまで
+Finalizerへ進まない。

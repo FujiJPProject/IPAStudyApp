@@ -11,14 +11,32 @@ Read:
 
 1. `AGENTS.md`
 2. `.agents/roles/release-auditor.md`
-3. `docs/requirements.md`
-4. `docs/architecture.md`
+3. `doc/requirements.md`
+4. `doc/architecture.md`
 5. current repository
 6. package.json
 7. package-lock.json
 8. relevant feature Reviews
 
-Read `docs/ui-reference.html` for UI and learning-flow verification.
+Read `doc/ui-reference.html` for UI and learning-flow verification.
+
+---
+
+## Parallel Investigation
+
+The parent Orchestrator may run at most three non-overlapping read-only
+investigations in parallel for Phase 9, for example:
+
+- requirements, routing, and feature integration
+- architecture, state ownership, and persistence
+- tests, UI, responsive behavior, and release risks
+
+Investigation agents must not modify files.
+After they finish, exactly one designated Release Auditor validates and
+consolidates the results into the integration Review artifact.
+
+Do not parallelize the final artifact write, tests that contend for the same
+outputs, or any application-code change.
 
 ---
 

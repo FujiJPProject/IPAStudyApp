@@ -10,11 +10,11 @@ description: Build the minimum Vue 3 application foundation defined by architect
 Read:
 
 1. `AGENTS.md`
-2. `docs/requirements.md`
-3. `docs/architecture.md`
+2. `doc/requirements.md`
+3. `doc/architecture.md`
 4. the specified foundation Task
 
-Read `docs/ui-reference.html` only when necessary for
+Read `doc/ui-reference.html` only when necessary for
 basic layout or responsive structure.
 
 ---
@@ -96,3 +96,4 @@ Complete only when:
 - no feature-specific implementation was introduced early
 
 Report using the format defined in `AGENTS.md`.
+

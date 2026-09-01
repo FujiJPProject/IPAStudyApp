@@ -44,9 +44,9 @@ MVP教材である
 
 ## Source of Truth
 
-- `docs/requirements.md`
-- `docs/architecture.md`
-- `docs/ui-reference.html`
+- `doc/requirements.md`
+- `doc/architecture.md`
+- `doc/ui-reference.html`
 
 `ui-reference.html` の具体的なJavaScript処理を
 確定仕様として扱わない。
@@ -143,8 +143,12 @@ architecture.mdにより以下は確定済み。
 
 ## Unblock Condition
 
-上記Open Decisionsが確定し、
-このTaskの `Confirmed Decisions` へ反映された時点で、
+以下をすべて満たした時点で、
+
+- 上記Open Decisionsが確定し、このTaskの `Confirmed Decisions` へ反映されている
+- 依存TaskがすべてDoneである
+- 必要なSource of Truth更新が完了している
+- Source of Truth間に実装判断へ影響する矛盾がない
 
 ```text
 Status: Ready
