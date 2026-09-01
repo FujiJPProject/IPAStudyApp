@@ -166,7 +166,7 @@ Codexでは、`.codex/agents/*.toml` の
 カスタムエージェントへ対象作業を明示的に委譲する。
 
 1つの機能変更を計画から完了まで進める場合は、
-Codexのメインスレッドを親Orchestratorとして使用する。
+各工程でCodexのメインスレッドを親Orchestratorとして使用する。
 Orchestratorは `.codex/agents` の子エージェントではない。
 
 ```text
@@ -202,9 +202,8 @@ Task:
 
 上記は単独工程を手動実行する場合の基本形である。
 
-機能サイクル全体をCodexへ委譲する場合は、
-`.agents/roles/orchestrator.md` と
-`.agents/skills/orchestrate-feature-cycle/SKILL.md` を指定する。
+本手順のPhase 8では、Phase 8-A / 8-B、Phase 8-C、Phase 8-Dを
+それぞれ独立したプロンプトとして実行し、TaskとReview成果物で受け渡す。
 
 Phase 5〜8の状態遷移は親が順番に管理し、
 builder、Review成果物を書き込むreviewer、fixer、finalizerを同時に起動しない。
@@ -667,173 +666,7 @@ Task外の実装や設計変更は行わないでください。
 
 ---
 
-# 12. Phase 5：機能実装
-
-## 目的
-
-1回のプロンプトにつき、原則1機能だけ実装する。
-
-例えば「ソート可視化」を実装するときに、「問題演習」「学習履歴」「苦手分析」まで同時に実装しない。
-
-Phase 8の親Orchestratorを利用する場合、
-ユーザーがこのPhaseを個別に起動する必要はない。
-親がTaskのReadyと依存関係を確認した後、1つのBuilderへ委譲する。
-
-## 推奨モデル
-
-```text
-GPT-5.6 Terra
-```
-
-複雑なアルゴリズム、原因の切り分けが難しい実装、設計判断を伴う場合のみGPT-5.6 Solを利用する。
-
-## 推奨環境
-
-```text
-基本：ChatGPT Work（デスクトップでローカルフォルダを使用）
-必要時のみ：Codex（デスクトップ）
-```
-
-## 単独実行・手動フォールバック用プロンプト例
-
-```text
-AGENTS.mdを確認してください。
-
-今回はBuilderとして作業してください。
-
-Role:
-.agents/roles/builder.md
-
-Skill:
-.agents/skills/implement-feature/SKILL.md
-
-Task:
-.agents/tasks/[task].md
-
-TaskのStatusと依存Taskを最初に確認してください。
-
-Readyの場合のみ実装し、
-完了後はnpm run testとnpm run buildを実行してください。
-```
-
----
-
-# 13. Phase 6：コードレビュー
-
-## 目的
-
-実装とレビューは別タスクとして実施し、実装した機能が要件・設計・品質基準を満たしているか確認する。
-
-レビュー時にはコードを変更しない。
-
-通常は1つのReviewerを使用する。
-アーキテクチャ・共通コード境界、複数機能、状態・永続化・セキュリティ、
-または広範な回帰リスクへ影響する重要レビューだけ、
-親が最大2つの独立した読み取り専用調査を並列実行してよい。
-
-並列調査担当はReview成果物を書き込まない。
-調査完了後、1つのReviewerが結果を検証・統合し、
-Taskで指定されたReview成果物を作成する。
-
-## 推奨モデル
-
-```text
-GPT-5.6 Terra
-```
-
-通常の機能単位レビューはGPT-5.6 Terraを基本とする。アーキテクチャへの影響が大きい変更、複数機能にまたがる変更、重大な不具合の可能性がある場合のみGPT-5.6 Solを利用する。
-
-## 推奨環境
-
-```text
-基本：ChatGPT Work（デスクトップでローカルフォルダを使用）
-必要時のみ：Codex（デスクトップ）
-
-※別Workチャット
-```
-
-## 単独実行・手動フォールバック用プロンプト例
-
-```text
-AGENTS.mdを確認してください。
-
-今回はReviewerとして作業してください。
-
-Role:
-.agents/roles/reviewer.md
-
-Skill:
-.agents/skills/review-feature/SKILL.md
-
-Task:
-.agents/tasks/[task].md
-
-現在の実装をレビューしてください。
-
-アプリケーションコードは変更しないでください。
-
-レビュー結果だけ、
-Taskで指定された.agents/reviews/配下へ保存してください。
-```
-
----
-
-# 14. Phase 7：レビュー指摘修正
-
-## 目的
-
-コードレビューで指摘された問題のうち、リリースや次工程へ進むうえで重要なCritical / Highを必要最小限の変更で修正する。
-
-## 推奨モデル
-
-```text
-GPT-5.6 Terra
-```
-
-修正に設計判断が必要な場合や、原因がレビュー指摘だけでは確定できない場合のみGPT-5.6 Solを利用する。
-
-## 推奨環境
-
-```text
-基本：ChatGPT Work（デスクトップでローカルフォルダを使用）
-必要時のみ：Codex（デスクトップ）
-```
-
-## 単独実行・手動フォールバック用プロンプト例
-
-```text
-AGENTS.mdを確認してください。
-
-今回はFixerとして作業してください。
-
-Role:
-.agents/roles/fixer.md
-
-Skill:
-.agents/skills/fix-review/SKILL.md
-
-Task:
-.agents/tasks/[task].md
-
-Review:
-.agents/reviews/[review].md
-
-Critical / Highだけを必要最小限で修正してください。
-
-Medium / Lowは変更しないでください。
-```
-
-Fixerがアプリケーションコードを変更した場合は、
-Phase 6のReviewerを必ず再実行する。
-Reviewerが `Next step: proceed` と判断するまでFinalizerへ進まない。
-
-親Orchestratorが管理するFixerからReviewerまでのサイクルは最大2回とする。
-2回後もCritical / Highが残る場合は自動継続せず、
-残存指摘と必要な判断をユーザーへ報告する。
-
----
-
-# 15. Phase 8：機能追加を繰り返す
+# 12. Phase 8：機能追加を繰り返す
 
 ## 目的
 
@@ -845,9 +678,10 @@ Source of Truthへの影響と未確定事項を整理し、
 必要な資料更新とTask準備が完了してからPhase 5〜7へ進む。
 
 Codexを利用する場合は、メインスレッドを親Orchestratorとし、
-1つのユーザー要求の中で各Roleを別サブエージェントへ順番に委譲する。
-未確定事項がある場合だけユーザーへ質問して停止し、
-回答後は同じ親スレッドで状態遷移を再開する。
+Phase 8-A / 8-B、Phase 8-C、Phase 8-Dを別プロンプトとして実行する。
+各プロンプト内では対象Roleを別サブエージェントへ順番に委譲する。
+未確定事項がある場合はユーザーへ質問して停止し、
+回答後に同じPhaseの親スレッドを再開する。
 
 ## 仮定への結論
 
@@ -895,7 +729,7 @@ Source of Truth間の複雑な矛盾や大きなアーキテクチャ変更を�
 ```text
 変更要求・Candidate Reference
 ↓
-Codexメインスレッドが親Orchestratorとして開始
+Phase 8-A / 8-Bの親Orchestratorを開始
 ↓
 Plannerによる差分・影響分析
 ↓
@@ -909,6 +743,8 @@ Taskを新規作成または更新
 ↓
 Status: Readyを確認
 ↓
+Phase 8-Cの統合プロンプトを開始
+↓
 Phase 5：Builderによる実装
 ↓
 Phase 6：Reviewerによるレビュー
@@ -921,9 +757,9 @@ Fixerが変更した場合はPhase 6：Reviewerを再実行
 ↓
 npm run test / npm run build
 ↓
-Phase 8-D：FinalizerがStatus: Doneへ変更
+Phase 8-Cを停止
 ↓
-親OrchestratorがTask、Review、差分を再確認して統合報告
+Phase 8-DのプロンプトでFinalizerがStatus: Doneへ変更
 ```
 
 未確定事項が残る場合は、TaskをBlockedのままにし、実装へ進まない。
@@ -1155,18 +991,25 @@ Task Template:
 
 ---
 
-## Codexで親Orchestratorを利用するプロンプト
+## CodexでPhase 8-A / 8-Bを親管理するプロンプト
 
 ```text
 AGENTS.mdを確認してください。
 
-Codexのメインスレッドを親Orchestratorとして使用してください。
+Codexのメインスレッドを親Orchestratorとして使用し、
+Phase 8-A / 8-Bだけを管理してください。
 
 Role:
 .agents/roles/orchestrator.md
 
-Skill:
-.agents/skills/orchestrate-feature-cycle/SKILL.md
+Planner Role:
+.agents/roles/planner.md
+
+Planner Skill:
+.agents/skills/plan-feature-change/SKILL.md
+
+Task Template:
+.agents/tasks/TEMPLATE.md
 
 変更要求：
 [追加・変更・削除したい内容]
@@ -1179,17 +1022,14 @@ Candidate Reference：
 
 # 実行方法
 
-- planner、builder、reviewer、fixer、finalizerを必要な順番で委譲してください
-- Phase 5〜8の状態遷移と書き込み作業は順次実行してください
-- 各委譲後にTask、Review、現在の差分を親が再確認してください
+- plannerへ差分・影響分析を委譲してください
 - 未確定事項があれば、重複を除いた質問を私へ返して停止してください
-- 回答後は同じ親スレッドで再開してください
-- Task、実装、Reviewを確認し、最初の未完了Gateから再開してください
-- 新規実装はTaskがReadyになった場合だけBuilderへ進めてください
-- Blocked TaskはPlannerが解除条件を分析してよいですが、Builderは起動しないでください
-- Reviewerの正確なNext stepに基づいてFixerまたはFinalizerへ進めてください
-- Fixerがコードを変更した場合は必ずReviewerを再実行してください
-- FixerからReviewerまでのサイクルは最大2回にしてください
+- 回答が確定するまではファイルを変更しないでください
+- 回答後は同じ親スレッドでplannerへ確定内容の反映を委譲してください
+- 必要なSource of Truthを先に更新し、その後Taskを作成または更新してください
+- Task Statusと理由を親が再確認してください
+- TaskがReadyまたはBlockedになった時点で停止してください
+- builder、reviewer、fixer、finalizerは起動しないでください
 
 # 限定的な並列実行
 
@@ -1197,11 +1037,10 @@ Candidate Reference：
 効果がある場合だけ、次の読み取り専用調査に限定してください。
 
 - Plannerの独立した差分・影響調査：最大2並列
-- 重要レビューの独立した観点別調査：最大2並列
 
-小規模で明確なTaskは並列化しないでください。
+小規模で明確な変更は並列化しないでください。
 並列調査担当はファイルを変更せず、
-調査後に指定された1つのRoleだけが成果物を書き込んでください。
+調査後に1つのPlannerだけが質問または成果物を統合してください。
 
 # 停止条件
 
@@ -1209,13 +1048,11 @@ Candidate Reference：
 - TaskがBlockedまたは依存TaskがDoneではない
 - スコープ、設計、依存関係、外部依存の変更が必要である
 - 新しい権限または私の承認が必要である
-- 2回のFixerサイクル後もCritical / Highが残る
 
 上記の場合は推測で進めず、必要な質問または停止理由を報告してください。
 
 push、PR作成、merge、deployは行わないでください。
-最終的にTaskがDoneになった場合、各工程、変更ファイル、
-Review判断、test・build、Completion Evidenceを統合して報告してください。
+Phase 8-Cの実装・レビュー・修正は実行しないでください。
 ```
 
 質問へ回答する場合は、同じCodexチャットで次を送る。
@@ -1226,32 +1063,129 @@ Review判断、test・build、Completion Evidenceを統合して報告してく�
 [確定回答]
 
 親Orchestratorとして同じ機能サイクルを再開してください。
-確定した内容だけをPlannerへ渡し、TaskがReadyになった場合は
-orchestrate-feature-cycleの状態遷移に従って続行してください。
+確定した内容だけをPlannerへ渡し、必要なSource of TruthとTaskを更新してください。
+Task Statusと理由を確認したら、Phase 8-Cへ進まず停止してください。
 ```
 
 ---
 
 ## Phase 8-C：Phase 5〜7を実行
 
-TaskがReadyになった後、親Orchestratorが
-以下を別サブエージェントとして順番に実施する。
+Phase 8-BでTaskがReadyになった後に使用する。
+Phase 5〜7の実装・レビュー・修正・再レビューを、
+親Orchestratorへの1つのプロンプトで順次実行する。
 
-1. Phase 5のBuilderプロンプトで実装する
-2. Phase 6のReviewerプロンプトでレビューする
-3. Critical / Highがある場合だけPhase 7のFixerプロンプトで修正する
-4. Fixerがコードを変更した場合はPhase 6を必ず再実行する
-5. 最新Reviewが現在の実装を対象とし、`Next step: proceed` で終了していることを確認する
-6. `npm run test` と `npm run build` の成功を確認する
+### Codex用統合プロンプト
 
-実装・レビュー・修正では同じTaskを参照する。
-同一サブエージェントにPlanner、Builder、Reviewer、Fixerを兼務させない。
+```text
+AGENTS.mdを確認してください。
 
-親Orchestratorへの1回のユーザー要求が複数Phaseにまたがることは許可するが、
-親は各Phaseの完了とGateを確認してから次のサブエージェントを起動する。
+Codexのメインスレッドを親Orchestratorとして使用し、
+次のTaskについてPhase 5〜7を順次管理してください。
 
-FixerからReviewerまでのサイクルは最大2回とする。
-2回後もCritical / Highが残る場合は停止し、ユーザーへ報告する。
+Orchestrator Role:
+.agents/roles/orchestrator.md
+
+Task:
+.agents/tasks/[task].md
+
+Builder:
+- Custom Agent: builder
+- Role: .agents/roles/builder.md
+- Skill: .agents/skills/implement-feature/SKILL.md
+
+Reviewer:
+- Custom Agent: reviewer
+- Role: .agents/roles/reviewer.md
+- Skill: .agents/skills/review-feature/SKILL.md
+
+Fixer:
+- Custom Agent: fixer
+- Role: .agents/roles/fixer.md
+- Skill: .agents/skills/fix-review/SKILL.md
+
+# 目的
+
+同じTaskを基準として、
+Builderによる実装、Reviewerによる正式レビュー、
+必要な場合だけFixerによるCritical / High修正、
+修正後のReviewer再実行まで完了してください。
+
+最新Reviewが現在の実装を対象とし、
+Next step: proceedで終了した時点で停止してください。
+
+# 開始Gate
+
+- TaskのStatusと依存Taskを最初に確認してください
+- TaskがReadyで、依存TaskがすべてDoneの場合だけ開始してください
+- BlockedまたはDoneの場合はコードを変更せず、理由を報告して停止してください
+- 既存の実装・Reviewがある場合は、現在状態を確認して最初の未完了工程から再開してください
+
+# Phase 5：Builder
+
+- 1つのbuilderへ実装を委譲してください
+- TaskのScope、Out of Scope、Allowed Changes、Acceptance Criteriaを守ってください
+- Task外機能、設計変更、不要な依存追加、大規模リファクタリングを行わないでください
+- 必要なテストを追加または更新してください
+- npm run testとnpm run buildを実行してください
+- Builder自身に正式レビューを行わせないでください
+- Source of TruthとTaskを変更させないでください
+
+# Phase 6：Reviewer
+
+- Builder完了後、別のreviewerへ正式レビューを委譲してください
+- Task、Source of Truth、現在の実装、関連テストを基準にしてください
+- Reviewerはアプリケーションコード、Source of Truth、Taskを変更しないでください
+- Taskで指定されたReview成果物だけを作成または更新してください
+- 通常は1つのReviewerを使用してください
+- 重要レビューの場合だけ、独立した読み取り専用調査を最大2並列で実行してよいです
+- 並列調査担当はReview成果物を書き込まないでください
+- 並列調査後、1つのReviewerが検証・重複排除・Severity確定・成果物作成を行ってください
+- Reviewの最後をNext step: proceedまたはNext step: fix Critical / Highのどちらかで終了してください
+
+# Phase 7：Fixerと再Reviewer
+
+- Next step: fix Critical / Highの場合だけ、1つのfixerへ修正を委譲してください
+- Critical / Highだけを必要最小限で修正してください
+- Medium / Low、機能追加、設計変更、不要なリファクタリングは対象外です
+- 修正後にnpm run testとnpm run buildを実行してください
+- Fixerがアプリケーションコードを変更した場合は、必ず別のreviewerを再実行してください
+- Fixerの報告だけで完了と判断しないでください
+- FixerからReviewerまでのサイクルは最大2回にしてください
+- 2回後もCritical / Highが残る場合は自動継続せず停止してください
+
+# 順次実行と停止条件
+
+- Builder、Review成果物を書き込むReviewer、Fixerを同時実行しないでください
+- 各サブエージェント完了後、親がTask、Review、現在の差分を再確認してください
+- 重要な未確定事項、Source of Truthの矛盾、スコープ・設計・依存変更が必要な場合は推測で進めないでください
+- 新しい権限または私の判断が必要な場合は、質問をまとめて停止してください
+- testまたはbuildが失敗し、安全な次工程を確定できない場合は停止してください
+
+# このプロンプトで行わないこと
+
+- plannerとfinalizerを起動しないでください
+- TaskのStatusとCompletion Evidenceを変更しないでください
+- Source of Truthを変更しないでください
+- push、PR作成、merge、deployを行わないでください
+
+# 完了報告
+
+Next step: proceedになった場合は、次だけを統合して報告してください。
+
+1. Builder、Reviewer、Fixer、再Reviewerの実行有無
+2. 変更ファイル
+3. test・build結果
+4. 最終Reviewのパスと判断
+5. 残っているMedium / Low
+6. Phase 8-DのFinalizerへ進める状態か
+
+停止した場合は、停止したGate、変更済みファイル、
+未解決事項、必要な次のRoleまたはユーザー判断を報告してください。
+```
+
+このプロンプトではFinalizerを実行しない。
+最終Reviewが `Next step: proceed` になった後、Phase 8-Dへ進む。
 
 ---
 
@@ -1336,7 +1270,8 @@ finalizerの完了を待ち、結果を統合して報告してください。
 - [ ] 既存Taskを重複作成していない
 - [ ] TaskのStatusがGateに従っている
 - [ ] TaskがReadyになるまで実装していない
-- [ ] 親がPhase 5〜8の状態遷移を順次管理した
+- [ ] Phase 8-A / 8-B、Phase 8-C、Phase 8-Dを別プロンプトで実施した
+- [ ] Phase 8-Cの親がPhase 5〜7を順次管理した
 - [ ] Planner、Builder、Reviewer、Fixer、Finalizerを別Roleとして実施した
 - [ ] 並列実行は許可された読み取り専用調査だけである
 - [ ] 書き込み可能なRoleを同時実行していない
@@ -1351,7 +1286,7 @@ finalizerの完了を待ち、結果を統合して報告してください。
 
 ---
 
-# 16. Phase 9：全体統合レビュー
+# 13. Phase 9：全体統合レビュー
 
 ## 目的
 
@@ -1426,7 +1361,7 @@ Review Skill:
 
 ---
 
-# 17. Phase 10：Cloudflare Pagesデプロイ準備・可否確認
+# 14. Phase 10：Cloudflare Pagesデプロイ準備・可否確認
 
 ## 目的
 
@@ -1480,7 +1415,7 @@ Cloudflare側設定変更は行わないでください。
 
 ---
 
-# 18. Workで失敗した場合の修正ルール（必要時Codex）
+# 15. Workで失敗した場合の修正ルール（必要時Codex）
 
 ChatGPT Workで期待する結果が得られなかった場合、最初から作り直させない。
 
@@ -1620,7 +1555,7 @@ UIを添付HTMLに近づけてください。
 
 ---
 
-# 19. プロンプト設計ルール
+# 16. プロンプト設計ルール
 
 AIへの指示では以下を優先する。
 
@@ -1670,9 +1605,9 @@ Step 3で……
 
 ---
 
-# 20. 使用量を抑えるルール
+# 17. 使用量を抑えるルール
 
-## 20.1 毎回巨大なHTMLを貼らない
+## 17.1 毎回巨大なHTMLを貼らない
 
 可能であればプロジェクト内に保存し、
 
@@ -1684,7 +1619,7 @@ ui-reference.htmlを参照してください。
 
 ---
 
-## 20.2 コード全文を回答させない
+## 17.2 コード全文を回答させない
 
 ChatGPT Work（または必要時のCodex）が直接リポジトリを編集できる場合は、
 
@@ -1703,7 +1638,7 @@ ChatGPT Work（または必要時のCodex）が直接リポジトリを編集で
 
 ---
 
-## 20.3 1機能ずつ処理する
+## 17.3 1機能ずつ処理する
 
 悪い例：
 
@@ -1719,7 +1654,7 @@ ChatGPT Work（または必要時のCodex）が直接リポジトリを編集で
 
 ---
 
-## 20.4 高性能モデルを常用しない
+## 17.4 高性能モデルを常用しない
 
 ```text
 ChatGPT Plusでの軽い整理 → Instant
@@ -1735,7 +1670,7 @@ Codex → 親Orchestratorによる機能サイクル管理、またはWorkで解
 
 ---
 
-## 20.5 並列サブエージェントを常用しない
+## 17.5 並列サブエージェントを常用しない
 
 並列サブエージェントは各自がコンテキスト確認とモデル・ツール処理を行うため、
 ユーザーの指示回数は減っても使用量が減るとは限らない。
@@ -1756,7 +1691,7 @@ Phase 9の読み取り専用調査        → 最大3並列
 
 ---
 
-# 21. 開発時の禁止事項
+# 18. 開発時の禁止事項
 
 AIに以下を許可しない。
 
@@ -1773,7 +1708,7 @@ AIに以下を許可しない。
 
 ---
 
-# 22. 推奨するプロジェクト全体フロー
+# 19. 推奨するプロジェクト全体フロー
 
 ```text
 ChatGPT Plus
@@ -1842,7 +1777,7 @@ Cloudflare Pages
 
 ---
 
-# 23. 最重要ルール
+# 20. 最重要ルール
 
 AI開発では、
 
@@ -1872,9 +1807,10 @@ Finalizerによる完了確定
 
 という工程を守ることを優先する。
 
-Codexの親Orchestratorへ1回のユーザー要求で機能完了まで依頼してよい。
-ただし、親が複数Roleを兼務することや、依存する書き込み工程を同時実行することを意味しない。
-各Roleを別サブエージェントへ順次委譲し、Gateを満たした場合だけ次へ進む。
+Phase 8では、計画、Phase 5〜7の統合実行、Finalizerを
+Phase 8-A / 8-B、Phase 8-C、Phase 8-Dの別プロンプトとして実行する。
+Phase 8-Cでは親が各Roleを別サブエージェントへ順次委譲し、
+Gateを満たした場合だけ次へ進む。
 
 また、1回のプロンプトでは、
 
