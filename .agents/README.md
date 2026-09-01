@@ -47,8 +47,11 @@ Codexは`.agents/skills/*/SKILL.md`をSkillとして検出できる。
 | 長時間作業の継続目標 | Codex Goal mode |
 
 Roleの正本は`.agents/roles/*.md`とする。
-`.codex/agents/*.toml`は、CodexからRoleを起動するための
-薄い設定レイヤーとして扱う。
+`planner.toml`、`builder.toml`、`reviewer.toml`、`fixer.toml`、
+`finalizer.toml`、`release-auditor.toml`は、Codexから対応するRoleを
+起動するための薄い設定レイヤーとして扱う。
+`workflow-analyst.toml`だけは、Codexで独立した読み取り専用調査を
+行うためのCodex専用Custom Agentであり、対応するRoleファイルを持たない。
 
 ## Feature Cycle
 
@@ -100,7 +103,12 @@ Finalizerだけが完了Gate確認後にTaskを`Done`へ変更する。
 MVP全体レビューは`integration-review` Skillを使用する。
 Cloudflare Pagesのデプロイ可否確認は`deploy-readiness` Skillを使用する。
 
-どちらも`release_auditor`へ委譲し、
-アプリケーションコード、Source of Truth、Task、GitHub状態を変更しない。
+ChatGPT Workでは`.agents/roles/release-auditor.md`を明示し、
+Codexではカスタムエージェント`release_auditor`へ委譲する。
+どちらもアプリケーションコード、Source of Truth、Task、GitHub状態を変更しない。
+
+Codexの読み取り専用並列調査には`workflow_analyst`を使用する。
+ChatGPT WorkではCodex専用Custom Agentを前提にせず、
+選択したSkillが許可する場合だけ汎用の読み取り専用subagentを使用する。
 並列調査の上限と成果物の書き込み規則は、選択したSkillに従う。
 
