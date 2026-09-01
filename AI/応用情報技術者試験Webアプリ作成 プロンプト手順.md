@@ -109,13 +109,15 @@ project/
 │     └─ TEMPLATE.md
 │
 ├─ .codex/
+│  ├─ config.toml
 │  └─ agents/
 │     ├─ planner.toml
 │     ├─ builder.toml
 │     ├─ reviewer.toml
 │     ├─ fixer.toml
 │     ├─ finalizer.toml
-│     └─ release-auditor.toml
+│     ├─ release-auditor.toml
+│     └─ workflow-analyst.toml
 │
 ├─ src/ -- 現在の実装状態
 ├─ package.json
@@ -177,7 +179,11 @@ reviewer        → 機能レビュー
 fixer           → Critical / High修正
 finalizer       → 最終Review・test・build確認後のTask完了確定
 release_auditor → 統合・デプロイ可否レビュー
+workflow_analyst → Codex専用の読み取り専用調査
 ```
+
+`workflow_analyst`は対応するRoleファイルを持たないCodex専用Custom Agentである。
+それ以外のCustom Agentは、対応するRoleを起動する薄い設定レイヤーとして扱う。
 
 `.agents/skills/*/SKILL.md` と `.agents/tasks/*.md` は、
 WorkとCodexの両方で共通の作業手順・要求として利用する。
@@ -1308,7 +1314,9 @@ Codex → 親Orchestratorによる機能サイクル管理、またはWorkで解
 小規模で明確なTaskは親と1つの担当エージェントで順次処理する。
 
 並列化する場合は、選択したSkillの上限と分割条件に従う。
-読み取り専用調査には`workflow_analyst`を使用し、
+Codexの読み取り専用調査には`workflow_analyst`を使用する。
+ChatGPT WorkではCodex専用Custom Agentを前提にせず、
+選択したSkillが許可する場合だけ汎用の読み取り専用subagentを使用する。
 同じ情報を無条件に全エージェントへ渡さない。
 
 独立した担当範囲と必要なコンテキストだけを指定する。
