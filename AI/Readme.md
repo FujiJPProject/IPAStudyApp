@@ -50,8 +50,12 @@ flowchart TD
   - 完了Gateを確認し、指定TaskのStatusとCompletion Evidenceだけを更新する
 - **release-auditor**
   - アプリ全体またはデプロイ可否を確認し、アプリケーションコードは変更しない
+
+### Codex専用Custom Agent
+
 - **workflow_analyst**
   - Codexで独立した読み取り専用調査を担当し、成果物は書き込まない
+  - 対応する`.agents/roles/*.md`は持たず、ChatGPT WorkのRoleとして扱わない
 
 ### Skill(手順)
 
