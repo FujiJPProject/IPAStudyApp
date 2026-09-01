@@ -34,6 +34,14 @@ Read supplied HTML, mocks, notes, or examples as Candidate References only.
 Do not modify any file during this phase.
 Do not continue while a material answer is missing.
 
+When the parent Orchestrator identifies two material, independent investigation
+lanes, it may delegate at most two read-only investigations in parallel.
+Each investigation must have a non-overlapping scope and must not modify files.
+One designated Planner validates and consolidates those results before asking the
+user questions or applying confirmed decisions.
+
+Do not use parallel investigation for a small, clear change.
+
 ## Candidate Reference Rule
 
 A Candidate Reference is not a Source of Truth.
@@ -71,6 +79,7 @@ After all required answers are confirmed:
 8. Set the Task status using the status gate below.
 
 Do not modify application code in this Skill.
+Apply confirmed decisions with exactly one Planner writer.
 
 ## Task Status Gate
 
@@ -101,4 +110,3 @@ After applying confirmed decisions, report:
 3. created or updated Task
 4. Task status and rationale
 5. remaining unresolved items
-

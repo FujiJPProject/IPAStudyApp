@@ -32,6 +32,15 @@ Review artifact under:
 .agents/reviews/
 ```
 
+Use one Reviewer by default.
+
+For an important review defined by `AGENTS.md`, the parent Orchestrator may run
+at most two non-overlapping read-only review investigations in parallel.
+Those investigation agents must not create or update the Review artifact.
+
+After the investigations finish, exactly one designated Reviewer must validate,
+deduplicate, assign final severities, and write the single Review artifact.
+
 ---
 
 ## Review Areas

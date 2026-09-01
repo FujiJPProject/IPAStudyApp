@@ -169,6 +169,55 @@ Completion Evidenceだけを更新してよい。
 
 ---
 
+## Parent Orchestration
+
+Codexで1つの機能変更を計画から完了まで進める場合は、
+メインスレッドを親Orchestratorとして使用する。
+
+親は以下を読む。
+
+1. `.agents/roles/orchestrator.md`
+2. `.agents/skills/orchestrate-feature-cycle/SKILL.md`
+3. 変更要求・Candidate Referenceまたは指定Task
+
+親はPlanner、Builder、Reviewer、Fixer、Finalizerを
+必要な順番でサブエージェントとして委譲し、
+結果を待ってからTask、Review、現在の差分を再確認する。
+
+既存Taskを再開する場合は、実装とReviewの現在状態を確認し、
+完了済み工程を無条件に繰り返さず最初の未完了Gateから再開する。
+
+Phase 5〜8の状態遷移は順次実行する。
+Builder、Review成果物を書き込むReviewer、Fixer、Finalizerを含む
+書き込み作業を並列実行しない。
+
+並列実行できるのは、親が独立していると確認した
+読み取り専用の次の作業だけである。
+
+- Plannerの差分・影響調査：最大2並列
+- 重要レビューの観点別調査：最大2並列
+- Phase 9の統合レビュー調査：最大3並列
+
+重要レビューとは、アーキテクチャまたは共通コード境界をまたぐ、
+複数機能へ影響する、状態・永続化・セキュリティ・広範な回帰リスクがある、
+または単一Reviewerでは十分な確信を得にくいレビューをいう。
+
+並列調査担当はファイルを変更しない。
+調査結果を統合した後、指定された1つのRoleだけが成果物を書き込む。
+小規模で明確なTaskは並列化しない。
+
+Fixerがコードを変更した場合は必ずReviewerへ戻る。
+FixerからReviewerまでのサイクルは最大2回とし、
+それでもCritical / Highが残る場合はユーザーへ報告して停止する。
+
+重要な未確定事項、Source of Truthの矛盾、スコープ・設計・依存変更、
+新しい権限または承認が必要な場合は、推測で進めずユーザーへ質問する。
+
+OrchestratorはCodexのメインスレッドが担うため、
+`.codex/agents/orchestrator.toml` は作成しない。
+
+---
+
 ## Feature Change Planning Gate
 
 Phase 8で機能を追加・変更・削除する前に、
@@ -270,5 +319,8 @@ npm run preview
 ChatGPT Workでは、
 Role / Skill / Taskをプロンプトから明示的に指定する。
 
-Codexでは、必要に応じて `.codex/agents/*.toml` の
+Codexで機能サイクル全体を扱う場合は、メインスレッドが
+`orchestrate-feature-cycle` Skillに従って親Orchestratorとなる。
+
+各工程では、必要に応じて `.codex/agents/*.toml` の
 カスタムエージェントへ明示的に委譲する。

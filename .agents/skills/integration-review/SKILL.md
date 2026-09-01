@@ -22,6 +22,24 @@ Read `doc/ui-reference.html` for UI and learning-flow verification.
 
 ---
 
+## Parallel Investigation
+
+The parent Orchestrator may run at most three non-overlapping read-only
+investigations in parallel for Phase 9, for example:
+
+- requirements, routing, and feature integration
+- architecture, state ownership, and persistence
+- tests, UI, responsive behavior, and release risks
+
+Investigation agents must not modify files.
+After they finish, exactly one designated Release Auditor validates and
+consolidates the results into the integration Review artifact.
+
+Do not parallelize the final artifact write, tests that contend for the same
+outputs, or any application-code change.
+
+---
+
 ## Review Areas
 
 ### MVP Requirements
@@ -138,4 +156,3 @@ Conclude with:
 - MVP releaseable: Yes / No
 - mandatory fixes before release
 - deferrable improvements
-

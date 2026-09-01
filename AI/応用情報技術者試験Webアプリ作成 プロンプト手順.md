@@ -45,7 +45,7 @@ graph TD
 プラン          ：ChatGPT Plus
 要件・設計      ：ChatGPT Plus
 実装・テスト    ：ChatGPT Work（デスクトップ）
-難しい開発作業  ：Codex（必要時のみ）
+機能サイクル管理・難しい開発作業：Codex
 Web公開先       ：Cloudflare Pages
 本手順の完了地点：Cloudflare Pagesへデプロイ可能と確認できた状態
 ```
@@ -71,6 +71,7 @@ project/
 │  ├─ README.md
 │  │
 │  ├─ roles/
+│  │  ├─ orchestrator.md
 │  │  ├─ planner.md
 │  │  ├─ builder.md
 │  │  ├─ reviewer.md
@@ -79,6 +80,8 @@ project/
 │  │  └─ release-auditor.md
 │  │
 │  ├─ skills/
+│  │  ├─ orchestrate-feature-cycle/
+│  │  │  └─ SKILL.md
 │  │  ├─ plan-feature-change/
 │  │  │  └─ SKILL.md
 │  │  ├─ foundation/
@@ -162,7 +165,12 @@ ChatGPT Workでは、`.agents/roles/*.md` を
 Codexでは、`.codex/agents/*.toml` の
 カスタムエージェントへ対象作業を明示的に委譲する。
 
+1つの機能変更を計画から完了まで進める場合は、
+Codexのメインスレッドを親Orchestratorとして使用する。
+Orchestratorは `.codex/agents` の子エージェントではない。
+
 ```text
+orchestrator    → メインスレッドとしてRole間の状態遷移とユーザー対話を管理
 planner         → 機能変更計画、Source of Truth更新、Task準備
 builder         → Ready Taskの実装
 reviewer        → 機能レビュー
@@ -192,8 +200,24 @@ Task:
 結果をAGENTS.mdの形式で統合して報告してください。
 ```
 
-Phase 5〜7と完了確定は順番に行い、
-builder、reviewer、fixer、finalizerを同時に起動しない。
+上記は単独工程を手動実行する場合の基本形である。
+
+機能サイクル全体をCodexへ委譲する場合は、
+`.agents/roles/orchestrator.md` と
+`.agents/skills/orchestrate-feature-cycle/SKILL.md` を指定する。
+
+Phase 5〜8の状態遷移は親が順番に管理し、
+builder、Review成果物を書き込むreviewer、fixer、finalizerを同時に起動しない。
+
+限定的な並列実行は以下の読み取り専用調査だけに使用する。
+
+- Plannerの差分・影響調査：最大2並列
+- 重要レビューの観点別調査：最大2並列
+- Phase 9の統合レビュー調査：最大3並列
+
+並列調査担当はファイルを変更しない。
+調査後、指定された1つのRoleだけが成果物を書き込む。
+小規模で明確なTaskは並列化しない。
 
 ---
 
@@ -275,7 +299,7 @@ flowchart LR
 
 本手順はChatGPT Plusを前提とする。
 
-利用量を抑えるため、すべての作業で最高性能のモデル・推論設定を利用しない。利用する環境によって選択肢が異なるため、通常のChatGPTとChatGPT Workを分けて考え、CodexはWorkで解決困難な場合のみ利用する。
+利用量を抑えるため、すべての作業で最高性能のモデル・推論設定を利用しない。利用する環境によって選択肢が異なるため、通常のChatGPTとChatGPT Workを分けて考える。Codexは親Orchestratorによる機能サイクル管理、またはWorkで解決困難な作業に利用する。
 
 ## ChatGPTでの選択
 
@@ -303,16 +327,19 @@ ChatGPT PlusではInstant / Medium / Highを基本的な選択肢とする。Plu
 
 ## Codexを利用する条件
 
-Codexは通常の開発環境として常用せず、ChatGPT Workでの対応が難しい場合に利用する。
+Codexは、Phase 5〜8を親Orchestratorが少ないユーザー指示で管理する場合、
+またはChatGPT Workでの対応が難しい場合に利用する。
 
 主な利用例：
 
+- PlannerからFinalizerまでをGateに従って順次委譲する場合
+- Planner調査、重要レビュー、Phase 9レビューを限定的に並列化する場合
 - 原因の切り分けが難しいバグを、リポジトリ・ターミナル・開発ツールを横断して調査する場合
 - 広範囲のコード変更や複雑なリファクタリングが必要な場合
 - Workで複数回修正してもテストやビルドが安定しない場合
 - コードベース全体を対象とする専門的な実装・デバッグ作業が必要な場合
 
-Codexを利用する場合も、モデル選択はWorkと同様に、通常はGPT-5.6 Terra、難しい問題のみGPT-5.6 Solを基本とする。
+Codexを利用する場合も、モデル選択はWorkと同様に、通常はGPT-5.6 Terra、難しい問題のみGPT-5.6 Solを基本とする。並列サブエージェントは使用量が増えるため、小規模で明確なTaskでは利用しない。
 
 ---
 
@@ -648,6 +675,10 @@ Task外の実装や設計変更は行わないでください。
 
 例えば「ソート可視化」を実装するときに、「問題演習」「学習履歴」「苦手分析」まで同時に実装しない。
 
+Phase 8の親Orchestratorを利用する場合、
+ユーザーがこのPhaseを個別に起動する必要はない。
+親がTaskのReadyと依存関係を確認した後、1つのBuilderへ委譲する。
+
 ## 推奨モデル
 
 ```text
@@ -663,7 +694,7 @@ GPT-5.6 Terra
 必要時のみ：Codex（デスクトップ）
 ```
 
-## プロンプト例
+## 単独実行・手動フォールバック用プロンプト例
 
 ```text
 AGENTS.mdを確認してください。
@@ -695,6 +726,15 @@ Readyの場合のみ実装し、
 
 レビュー時にはコードを変更しない。
 
+通常は1つのReviewerを使用する。
+アーキテクチャ・共通コード境界、複数機能、状態・永続化・セキュリティ、
+または広範な回帰リスクへ影響する重要レビューだけ、
+親が最大2つの独立した読み取り専用調査を並列実行してよい。
+
+並列調査担当はReview成果物を書き込まない。
+調査完了後、1つのReviewerが結果を検証・統合し、
+Taskで指定されたReview成果物を作成する。
+
 ## 推奨モデル
 
 ```text
@@ -712,7 +752,7 @@ GPT-5.6 Terra
 ※別Workチャット
 ```
 
-## プロンプト例
+## 単独実行・手動フォールバック用プロンプト例
 
 ```text
 AGENTS.mdを確認してください。
@@ -759,7 +799,7 @@ GPT-5.6 Terra
 必要時のみ：Codex（デスクトップ）
 ```
 
-## プロンプト例
+## 単独実行・手動フォールバック用プロンプト例
 
 ```text
 AGENTS.mdを確認してください。
@@ -787,6 +827,10 @@ Fixerがアプリケーションコードを変更した場合は、
 Phase 6のReviewerを必ず再実行する。
 Reviewerが `Next step: proceed` と判断するまでFinalizerへ進まない。
 
+親Orchestratorが管理するFixerからReviewerまでのサイクルは最大2回とする。
+2回後もCritical / Highが残る場合は自動継続せず、
+残存指摘と必要な判断をユーザーへ報告する。
+
 ---
 
 # 15. Phase 8：機能追加を繰り返す
@@ -799,6 +843,11 @@ Reviewerが `Next step: proceed` と判断するまでFinalizerへ進まない�
 Phase 8では、最初に実装を依頼しない。
 Source of Truthへの影響と未確定事項を整理し、
 必要な資料更新とTask準備が完了してからPhase 5〜7へ進む。
+
+Codexを利用する場合は、メインスレッドを親Orchestratorとし、
+1つのユーザー要求の中で各Roleを別サブエージェントへ順番に委譲する。
+未確定事項がある場合だけユーザーへ質問して停止し、
+回答後は同じ親スレッドで状態遷移を再開する。
 
 ## 仮定への結論
 
@@ -837,8 +886,8 @@ Source of Truth間の複雑な矛盾や大きなアーキテクチャ変更を�
 ## 推奨環境
 
 ```text
-基本：ChatGPT Work（デスクトップでローカルフォルダを使用）
-必要時のみ：Codex（デスクトップ）
+親オーケストレーション：Codex（デスクトップ）
+各Phaseの手動実行：ChatGPT Work（デスクトップでローカルフォルダを使用）
 ```
 
 ## Phase 8の全体フロー
@@ -846,11 +895,13 @@ Source of Truth間の複雑な矛盾や大きなアーキテクチャ変更を�
 ```text
 変更要求・Candidate Reference
 ↓
+Codexメインスレッドが親Orchestratorとして開始
+↓
 Plannerによる差分・影響分析
 ↓
-未確定事項をユーザーへ質問
+未確定事項がある場合はユーザーへ質問して停止
 ↓
-回答確定
+必要な回答が確定したら同じ親スレッドで再開
 ↓
 必要なSource of Truthを更新
 ↓
@@ -871,9 +922,15 @@ Fixerが変更した場合はPhase 6：Reviewerを再実行
 npm run test / npm run build
 ↓
 Phase 8-D：FinalizerがStatus: Doneへ変更
+↓
+親OrchestratorがTask、Review、差分を再確認して統合報告
 ```
 
 未確定事項が残る場合は、TaskをBlockedのままにし、実装へ進まない。
+
+Phase 5〜8の状態遷移と書き込みは順次実行する。
+Plannerの調査と重要レビューだけ、独立した読み取り専用作業を最大2並列で実行してよい。
+小規模で明確なTaskでは並列化しない。
 
 ## Source of Truth更新判定
 
@@ -1098,14 +1155,18 @@ Task Template:
 
 ---
 
-## CodexでPlannerを利用するプロンプト
+## Codexで親Orchestratorを利用するプロンプト
 
 ```text
 AGENTS.mdを確認してください。
 
-カスタムエージェントplannerに、
-.agents/skills/plan-feature-change/SKILL.mdに従って
-今回の機能変更計画を委譲してください。
+Codexのメインスレッドを親Orchestratorとして使用してください。
+
+Role:
+.agents/roles/orchestrator.md
+
+Skill:
+.agents/skills/orchestrate-feature-cycle/SKILL.md
 
 変更要求：
 [追加・変更・削除したい内容]
@@ -1113,23 +1174,68 @@ AGENTS.mdを確認してください。
 Candidate Reference：
 [参照。なければ「なし」]
 
-まず差分・影響分析だけを行わせ、
-未確定事項があれば質問を返して停止してください。
+既存Task：
+[対応するTask。未確定または存在しない場合は「親が確認」]
 
-回答が確定するまでは、
-Source of Truth、Task、アプリケーションコードを変更しないでください。
+# 実行方法
 
-plannerの結果を待ち、要点を統合して報告してください。
-builder、reviewer、fixer、finalizerはまだ起動しないでください。
+- planner、builder、reviewer、fixer、finalizerを必要な順番で委譲してください
+- Phase 5〜8の状態遷移と書き込み作業は順次実行してください
+- 各委譲後にTask、Review、現在の差分を親が再確認してください
+- 未確定事項があれば、重複を除いた質問を私へ返して停止してください
+- 回答後は同じ親スレッドで再開してください
+- Task、実装、Reviewを確認し、最初の未完了Gateから再開してください
+- 新規実装はTaskがReadyになった場合だけBuilderへ進めてください
+- Blocked TaskはPlannerが解除条件を分析してよいですが、Builderは起動しないでください
+- Reviewerの正確なNext stepに基づいてFixerまたはFinalizerへ進めてください
+- Fixerがコードを変更した場合は必ずReviewerを再実行してください
+- FixerからReviewerまでのサイクルは最大2回にしてください
+
+# 限定的な並列実行
+
+並列実行は必須ではありません。
+効果がある場合だけ、次の読み取り専用調査に限定してください。
+
+- Plannerの独立した差分・影響調査：最大2並列
+- 重要レビューの独立した観点別調査：最大2並列
+
+小規模で明確なTaskは並列化しないでください。
+並列調査担当はファイルを変更せず、
+調査後に指定された1つのRoleだけが成果物を書き込んでください。
+
+# 停止条件
+
+- 重要な未確定事項またはSource of Truthの矛盾がある
+- TaskがBlockedまたは依存TaskがDoneではない
+- スコープ、設計、依存関係、外部依存の変更が必要である
+- 新しい権限または私の承認が必要である
+- 2回のFixerサイクル後もCritical / Highが残る
+
+上記の場合は推測で進めず、必要な質問または停止理由を報告してください。
+
+push、PR作成、merge、deployは行わないでください。
+最終的にTaskがDoneになった場合、各工程、変更ファイル、
+Review判断、test・build、Completion Evidenceを統合して報告してください。
 ```
 
-回答確定後は、同じplannerへPhase 8-Bの内容を委譲する。
+質問へ回答する場合は、同じCodexチャットで次を送る。
+
+```text
+前回の質問への確定回答は以下です。
+
+[確定回答]
+
+親Orchestratorとして同じ機能サイクルを再開してください。
+確定した内容だけをPlannerへ渡し、TaskがReadyになった場合は
+orchestrate-feature-cycleの状態遷移に従って続行してください。
+```
 
 ---
 
 ## Phase 8-C：Phase 5〜7を実行
 
-TaskがReadyになった後、以下を別作業として順番に実施する。
+TaskがReadyになった後、親Orchestratorが
+以下を別サブエージェントとして順番に実施する。
 
 1. Phase 5のBuilderプロンプトで実装する
 2. Phase 6のReviewerプロンプトでレビューする
@@ -1139,13 +1245,22 @@ TaskがReadyになった後、以下を別作業として順番に実施する�
 6. `npm run test` と `npm run build` の成功を確認する
 
 実装・レビュー・修正では同じTaskを参照する。
-Phase 8-A / 8-BとPhase 5〜7を1回のプロンプトで同時実行しない。
+同一サブエージェントにPlanner、Builder、Reviewer、Fixerを兼務させない。
+
+親Orchestratorへの1回のユーザー要求が複数Phaseにまたがることは許可するが、
+親は各Phaseの完了とGateを確認してから次のサブエージェントを起動する。
+
+FixerからReviewerまでのサイクルは最大2回とする。
+2回後もCritical / Highが残る場合は停止し、ユーザーへ報告する。
 
 ---
 
 ## Phase 8-D：Task完了確定
 
-Phase 8-Cの最終Reviewが完了した後、別作業として実施する。
+Phase 8-Cの最終Reviewが完了した後、
+親Orchestratorが別のFinalizerサブエージェントへ委譲する。
+
+手動運用では別作業として実施する。
 
 Finalizerは実装・レビュー・修正を行わない。
 完了Gateを検証し、条件をすべて満たす場合だけ、
@@ -1190,7 +1305,7 @@ npm run testとnpm run buildを実行し、
 - 条件を満たさない場合はTaskを変更せず、不足条件を報告してください
 ```
 
-### Codex用プロンプト
+### Codexで単独実行する場合のフォールバック用プロンプト
 
 ```text
 AGENTS.mdを確認してください。
@@ -1221,7 +1336,11 @@ finalizerの完了を待ち、結果を統合して報告してください。
 - [ ] 既存Taskを重複作成していない
 - [ ] TaskのStatusがGateに従っている
 - [ ] TaskがReadyになるまで実装していない
-- [ ] 実装・レビュー・修正を別作業として実施した
+- [ ] 親がPhase 5〜8の状態遷移を順次管理した
+- [ ] Planner、Builder、Reviewer、Fixer、Finalizerを別Roleとして実施した
+- [ ] 並列実行は許可された読み取り専用調査だけである
+- [ ] 書き込み可能なRoleを同時実行していない
+- [ ] FixerからReviewerまでのサイクルが最大2回である
 - [ ] Fixerがコードを変更した場合にReviewerを再実行した
 - [ ] 最新Reviewが現在の実装を対象としている
 - [ ] 最新Reviewが `Next step: proceed` で終了している
@@ -1237,6 +1356,11 @@ finalizerの完了を待ち、結果を統合して報告してください。
 ## 目的
 
 すべてのMVP機能が完成した段階で、アプリ全体が要件・設計に沿って統合され、リリース可能な状態か確認する。
+
+Phase 9は横断的な読み取り中心のため、Codexの親Orchestratorが
+独立した観点別調査を最大3並列で実行してよい。
+並列調査担当はファイルを変更せず、最後に1つのRelease Auditorが
+結果を検証・統合してReview成果物を書き込む。
 
 ## 推奨モデル
 
@@ -1268,6 +1392,36 @@ requirements.mdとarchitecture.mdを基準として、
 現在のMVP全体をレビューしてください。
 
 アプリケーションコードは変更しないでください。
+```
+
+### Codexで限定並列レビューを行うプロンプト
+
+```text
+AGENTS.mdを確認してください。
+
+Codexのメインスレッドを親Orchestratorとして、
+Phase 9の全体統合レビューを管理してください。
+
+Role:
+.agents/roles/orchestrator.md
+
+Review Skill:
+.agents/skills/integration-review/SKILL.md
+
+必要性がある場合だけ、次のような独立した読み取り専用調査を
+最大3並列で実行してください。
+
+- 要件、ルーティング、機能統合
+- アーキテクチャ、State責務、永続化
+- テスト、UI、レスポンシブ、リリースリスク
+
+各調査担当はファイルを変更しないでください。
+すべての調査完了後、1つのカスタムエージェントrelease_auditorへ
+結果と現在のリポジトリを検証させ、
+.agents/reviews/integration-review.mdへ統合させてください。
+
+アプリケーションコード、Source of Truth、Task、GitHub状態は
+変更しないでください。
 ```
 
 ---
@@ -1574,10 +1728,31 @@ ChatGPT Plusでの重要設計 → High
 ChatGPT Workでの通常実装 → GPT-5.6 Terra
 ChatGPT Workでの軽微修正 → GPT-5.6 Luna
 ChatGPT Workでの難しい問題・重要レビュー → GPT-5.6 Sol
-Codex → Workで解決困難なコード実装・デバッグ時のみ利用
+Codex → 親Orchestratorによる機能サイクル管理、またはWorkで解決困難な作業
 ```
 
 とする。
+
+---
+
+## 20.5 並列サブエージェントを常用しない
+
+並列サブエージェントは各自がコンテキスト確認とモデル・ツール処理を行うため、
+ユーザーの指示回数は減っても使用量が減るとは限らない。
+
+小規模で明確なTaskは親と1つの担当エージェントで順次処理する。
+
+並列化する場合も、以下を上限とする。
+
+```text
+Plannerの読み取り専用調査        → 最大2並列
+重要レビューの読み取り専用調査  → 最大2並列
+Phase 9の読み取り専用調査        → 最大3並列
+```
+
+同じ情報を全エージェントへ無条件に渡さず、
+独立した担当範囲と必要なコンテキストだけを指定する。
+書き込み作業は常に1つのRoleだけが行う。
 
 ---
 
@@ -1619,37 +1794,37 @@ ui-reference.html
 architecture.md
      │
      ▼
-ChatGPT Work（基本）
-必要時のみCodex
+ChatGPT Work（手動Phase実行）
+またはCodex親Orchestrator
      │
      ├─ アプリ基盤
      │
      ├─ 機能A
-     │    ├─ 計画・質問・Source of Truth更新
+     │    ├─ 親が計画・質問・Source of Truth更新を管理
      │    ├─ Task準備・Ready確認
      │    ├─ 実装
-     │    ├─ レビュー
+     │    ├─ レビュー（重要な場合だけ読み取り調査を最大2並列）
      │    ├─ 必要なら修正・再レビュー
      │    └─ FinalizerによるDone確定
      │
      ├─ 機能B
-     │    ├─ 計画・質問・Source of Truth更新
+     │    ├─ 親が計画・質問・Source of Truth更新を管理
      │    ├─ Task準備・Ready確認
      │    ├─ 実装
-     │    ├─ レビュー
+     │    ├─ レビュー（重要な場合だけ読み取り調査を最大2並列）
      │    ├─ 必要なら修正・再レビュー
      │    └─ FinalizerによるDone確定
      │
      ├─ 機能C
-     │    ├─ 計画・質問・Source of Truth更新
+     │    ├─ 親が計画・質問・Source of Truth更新を管理
      │    ├─ Task準備・Ready確認
      │    ├─ 実装
-     │    ├─ レビュー
+     │    ├─ レビュー（重要な場合だけ読み取り調査を最大2並列）
      │    ├─ 必要なら修正・再レビュー
      │    └─ FinalizerによるDone確定
      │
      ▼
-統合レビュー
+統合レビュー（読み取り調査を最大3並列）
      │
      ▼
 npm run build
@@ -1696,6 +1871,10 @@ Finalizerによる完了確定
 ```
 
 という工程を守ることを優先する。
+
+Codexの親Orchestratorへ1回のユーザー要求で機能完了まで依頼してよい。
+ただし、親が複数Roleを兼務することや、依存する書き込み工程を同時実行することを意味しない。
+各Roleを別サブエージェントへ順次委譲し、Gateを満たした場合だけ次へ進む。
 
 また、1回のプロンプトでは、
 
