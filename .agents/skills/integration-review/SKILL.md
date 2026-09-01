@@ -24,14 +24,14 @@ Read `doc/ui-reference.html` for UI and learning-flow verification.
 
 ## Parallel Investigation
 
-The parent Orchestrator may run at most three non-overlapping read-only
-investigations in parallel for Phase 9, for example:
+The parent Orchestrator may run at most three non-overlapping
+`workflow_analyst` investigations in parallel for this integration review, for example:
 
 - requirements, routing, and feature integration
 - architecture, state ownership, and persistence
 - tests, UI, responsive behavior, and release risks
 
-Investigation agents must not modify files.
+`workflow_analyst` agents must not modify files or write Review artifacts.
 After they finish, exactly one designated Release Auditor validates and
 consolidates the results into the integration Review artifact.
 
