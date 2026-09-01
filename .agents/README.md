@@ -20,6 +20,7 @@ Codexは`.agents/skills/*/SKILL.md`をSkillとして検出できる。
 │  ├─ finalizer.md
 │  └─ release-auditor.md
 ├─ skills/
+│  ├─ foundation/
 │  ├─ orchestrate-feature-cycle/
 │  ├─ plan-feature-change/
 │  ├─ implement-feature/
@@ -64,8 +65,9 @@ Plan
 → Finalize
 ```
 
-状態遷移、並列実行、停止・再開条件、完了Gateの詳細は、
-`.agents/skills/orchestrate-feature-cycle/SKILL.md`だけを正本とする。
+機能サイクル全体の状態遷移、停止・再開条件、完了Gateは、
+`.agents/skills/orchestrate-feature-cycle/SKILL.md`を正本とする。
+各工程固有の手順、書き込み境界、判定基準は、対応するSkillに従う。
 親Orchestrator用のカスタムエージェントは作成しない。
 
 ユーザーとのやり取りは親Orchestratorが行う。
