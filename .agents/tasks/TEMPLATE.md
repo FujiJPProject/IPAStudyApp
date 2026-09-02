@@ -22,10 +22,10 @@ Allowed values:
 
 以下をすべて満たす場合のみReadyへ変更する。
 
-- 重要なOpen Decisionsがない
-- 依存TaskがすべてDone
-- 必要なSource of Truth更新が完了している
-- Source of Truth間に実装判断へ影響する矛盾がない
+- 新規Taskの場合：重要なOpen Decisionsがなく、依存TaskがすべてDoneで、必要なSource of Truth更新が完了し、実装判断へ影響する矛盾がない
+- 再開Taskの場合：Integration ReviewのMandatory fixとRequired closureが指定され、Finalizerが`reopen-task` SkillのGateを満たしている
+
+`Done → Ready`は、Integration Reviewのブロッキング指摘を解消する再開時だけに許可する。
 
 以下をすべて満たす場合のみFinalizerがDoneへ変更する。
 
@@ -160,6 +160,21 @@ Readyの場合は `なし。` と書く。
 
 ---
 
+## Reopen History
+
+Integration Reviewのブロッキング指摘により`Done → Ready`へ戻した場合だけ、Finalizerが追記する。通常は`なし。`と書く。
+
+```text
+[YYYY-MM-DD] Integration remediation
+Integration Review: .agents/reviews/integration-review-[identifier].md
+Blocking Findings: [finding IDs]
+Required closure: [summary]
+Previous Final Review: .agents/reviews/[task-id]-review.md
+Reason: MVP releaseable: No
+```
+
+---
+
 ## Completion Evidence
 
 FinalizerがDoneへ変更するときに記載する。
@@ -170,7 +185,7 @@ Review Decision: Next step: proceed
 Verification: npm run test / npm run build succeeded
 ```
 
-ReadyまたはBlockedの場合は `未完了。` と書く。
+ReadyまたはBlockedの場合は `未完了。` と書く。`Done → Ready`へ戻す場合も`未完了。`に戻す。
 
 ---
 

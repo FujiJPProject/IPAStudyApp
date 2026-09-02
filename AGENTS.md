@@ -167,6 +167,11 @@ Taskで指定された範囲だけ変更する。
 FinalizerがGateを満たした指定TaskのStatusと
 Completion Evidenceだけを更新してよい。
 
+Integration Reviewのブロッキング指摘による再開では、
+Finalizerだけが選択されたSkillのGateに従い、指定Taskを
+`Done` から `Ready` へ戻し、Completion Evidenceと
+Reopen Historyを更新してよい。
+
 ---
 
 ## Work Output
@@ -214,9 +219,15 @@ Plan
 
 Taskの基本状態は次のとおりとする。
 
-- `Ready`：対応するBuilderを開始できる
+- `Ready`：対応するBuilderを開始できる。Integration Reviewの
+  ブロッキング指摘で再開されたTaskも含む
 - `Blocked`：解除条件を報告して停止する
-- `Done`：明示的な新規変更要求がない限り再実装しない
+- `Done`：明示的な新規変更要求またはIntegration Reviewの
+  ブロッキング指摘がない限り再実装しない
+
+ブロッキングなIntegration Review結果を残したTaskを`Done`のまま
+扱ってはならない。`Done → Ready`の再開条件と再確認条件は、
+選択したSkillをSource of Truthとする。
 
 ユーザー判断が必要な場合は、親Orchestratorが質問を統合して停止する。
 各サブエージェントの報告だけで次工程を決めず、

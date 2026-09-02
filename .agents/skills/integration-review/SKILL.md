@@ -136,11 +136,13 @@ npm run build
 
 Do not modify application code.
 
-The only permitted write is:
+The only permitted write is one new artifact under:
 
 ```text
-.agents/reviews/integration-review.md
+.agents/reviews/integration-review-[identifier].md
 ```
+
+Never overwrite a previous Integration Review. Use a unique identifier such as a date-time or sequence number.
 
 ---
 
@@ -153,14 +155,28 @@ Classify concrete findings as:
 - Medium
 - Low
 
-Write:
+Write one new artifact:
 
 ```text
-.agents/reviews/integration-review.md
+.agents/reviews/integration-review-[identifier].md
 ```
 
-Conclude with:
+Use this output contract:
 
-- MVP releaseable: Yes / No
-- mandatory fixes before release
-- deferrable improvements
+- `MVP releaseable: Yes / No`
+- `Next step: proceed / fix required / user decision required`
+- Blocking findings
+  - Finding ID
+  - Severity
+  - Affected Task
+  - Required closure
+- Mandatory fixes before release
+- Deferrable improvements
+
+When `MVP releaseable: Yes`, conclude with exactly `Next step: proceed`.
+
+When `MVP releaseable: No` and the correction does not require a user specification decision or Task split, conclude with exactly `Next step: fix required`. Every Mandatory fix must be classified as Critical or High and include an Affected Task and Required closure.
+
+When a requirement change, acceptance-criteria change, Task split, or another important product decision is necessary, conclude with exactly `Next step: user decision required`. Do not infer the decision.
+
+The Release Auditor does not modify application code, Tasks, or Source of Truth. The parent Orchestrator uses the result to select the next Skill.
