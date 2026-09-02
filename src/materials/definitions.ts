@@ -7,7 +7,7 @@ export const materialDefinitions: readonly MaterialDefinition[] = [
       id: 'sort-visualizer',
       name: 'ソートアルゴリズム可視化',
       field: 'アルゴリズム',
-      summary: '配列の比較と交換をステップ単位で確認し、整列までの流れを理解します。',
+      summary: '7種類のソートについて、比較、交換・移動・書き込みから整列までをステップ単位で確認します。',
     },
     component: SortMaterial,
   },

@@ -216,8 +216,6 @@ Goal modeと`orchestrate-feature-cycle` Skillで1つの機能サイクルを管�
 独立した読み取り専用調査が有効な場合だけ、
 `workflow_analyst`を選択したSkillの上限内で使用する。
 
-
-
 ---
 
 # 4. 推奨技術構成
@@ -711,12 +709,12 @@ Finalize   → finalizer
 
 ## Source of Truth更新判定
 
-| 変更内容 | 更新候補 |
-| --- | --- |
-| MVP範囲、機能要件、画面責務、学習体験、完了条件 | `doc/requirements.md` |
-| 画面構成、情報配置、操作、レスポンシブ表示、見せ方 | `doc/ui-reference.html` |
-| 実装方式、責務分離、データ構造、状態管理、永続化、テスト方針 | `doc/architecture.md` |
-| 上記を変えない実装詳細だけ | Source of Truth変更なし |
+| 変更内容                                                     | 更新候補                |
+| ------------------------------------------------------------ | ----------------------- |
+| MVP範囲、機能要件、画面責務、学習体験、完了条件              | `doc/requirements.md`   |
+| 画面構成、情報配置、操作、レスポンシブ表示、見せ方           | `doc/ui-reference.html` |
+| 実装方式、責務分離、データ構造、状態管理、永続化、テスト方針 | `doc/architecture.md`   |
+| 上記を変えない実装詳細だけ                                   | Source of Truth変更なし |
 
 Candidate Referenceは仕様ではない。
 差分を質問し、ユーザーが採用を確定した内容だけを
@@ -750,6 +748,8 @@ Taskを`Done`にできるのは、`finalize-task` Skillの完了Gateを
 ## Codex用：推奨Goalプロンプト
 
 1機能を計画から完了確定まで進める場合は、次を1回送る。
+
+プロンプトを投げる前に、変更要求の内容自体をAIに考えてもらう。
 
 ```text
 /goal
@@ -796,7 +796,9 @@ push、PR作成、merge、deployは行わないでください。
 
 回答後に変更要求、Skill全文、完了条件を再掲する必要はない。
 
-## Codex用：Planだけで停止する場合
+<details>
+
+<summary>Codex用：Planだけで停止する場合</summary>
 
 Source of TruthとTaskの準備だけを行う場合は、通常のCodexプロンプトで
 カスタムエージェント名と停止地点を明示する。
@@ -821,7 +823,11 @@ TaskがReadyまたはBlockedになった時点で停止してください。
 
 Roleパスだけではなく、`planner`というカスタムエージェント名を明示する。
 
-## ChatGPT Workで工程を手動実行する場合
+</details>
+
+<details>
+
+<summary>ChatGPT Workで工程を手動実行する場合</summary>
 
 Workでは対象Role、Skill、TaskまたはCandidate Referenceを明示する。
 
@@ -875,12 +881,12 @@ TaskがReadyまたはBlockedになった時点で停止し、
 
 Taskが`Ready`になった後は、Phase番号ではなく次の対応を使用する。
 
-| 工程 | Role | Skill | 追加コンテキスト | 次工程 |
-| --- | --- | --- | --- | --- |
-| Build | `.agents/roles/builder.md` | `.agents/skills/implement-feature/SKILL.md` | 対象Task | Review |
-| Review | `.agents/roles/reviewer.md` | `.agents/skills/review-feature/SKILL.md` | 対象Taskと現在の実装 | `proceed`ならFinalize、Critical / HighならFix |
-| Fix | `.agents/roles/fixer.md` | `.agents/skills/fix-review/SKILL.md` | 対象Taskと正式Review | 必ずRe-review |
-| Finalize | `.agents/roles/finalizer.md` | `.agents/skills/finalize-task/SKILL.md` | 対象Taskと最新Review | Gateを満たした場合だけDone |
+| 工程     | Role                         | Skill                                       | 追加コンテキスト     | 次工程                                        |
+| -------- | ---------------------------- | ------------------------------------------- | -------------------- | --------------------------------------------- |
+| Build    | `.agents/roles/builder.md`   | `.agents/skills/implement-feature/SKILL.md` | 対象Task             | Review                                        |
+| Review   | `.agents/roles/reviewer.md`  | `.agents/skills/review-feature/SKILL.md`    | 対象Taskと現在の実装 | `proceed`ならFinalize、Critical / HighならFix |
+| Fix      | `.agents/roles/fixer.md`     | `.agents/skills/fix-review/SKILL.md`        | 対象Taskと正式Review | 必ずRe-review                                 |
+| Finalize | `.agents/roles/finalizer.md` | `.agents/skills/finalize-task/SKILL.md`     | 対象Taskと最新Review | Gateを満たした場合だけDone                    |
 
 ChatGPT Workで個別工程を実行する場合は、次のテンプレートを使用する。
 
@@ -928,6 +934,8 @@ Fixerがアプリケーションコードを変更した場合は必ずReviewer�
 - [ ] `npm run build`が成功した
 - [ ] Finalizerが完了Gateを確認した
 - [ ] TaskがDoneになり、Completion Evidenceが記録された
+
+</details>
 
 ---
 
@@ -985,7 +993,6 @@ CodexのメインスレッドでMVP全体レビューを管理してください
 アプリケーションコード、Source of Truth、Task、GitHub状態は
 変更しないでください。
 ```
-
 
 ---
 
@@ -1047,7 +1054,6 @@ Cloudflare Pagesのデプロイ可否確認を委譲してください。
 実際のpush、PR作成、Cloudflare側設定変更、deployは
 行わないでください。
 ```
-
 
 ---
 
