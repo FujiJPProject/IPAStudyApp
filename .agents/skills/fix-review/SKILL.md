@@ -14,7 +14,7 @@ Read:
 3. `doc/requirements.md`
 4. `doc/architecture.md`
 5. the original Task
-6. the specified Review
+6. the specified feature ReviewまたはIntegration Review
 7. relevant current code and tests
 
 ---
@@ -26,13 +26,15 @@ By default fix only:
 - Critical
 - High
 
+Integration Reviewを入力にする場合は、`Next step: fix required`であり、指定Taskに対応付けられたMandatory fixだけを修正する。
+
 Do not fix Medium / Low unless a later Task explicitly requests them.
 
 ---
 
 ## Procedure
 
-1. Read all Critical / High findings.
+1. Read all Critical / High findings. Integration Reviewの場合は、指定TaskのMandatory fixとRequired closureだけを対象にする。
 2. Verify each finding against the current code.
 3. Identify the root cause.
 4. Make the smallest safe correction.

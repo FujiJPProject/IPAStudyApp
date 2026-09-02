@@ -30,7 +30,9 @@ graph TD
     F --> G["⑦ レビュー指摘修正"]
     G --> H["⑧ 機能追加サイクル"]
     H --> I["⑨ 全体統合レビュー"]
-    I --> J["⑩ Cloudflare Pagesデプロイ準備・可否確認"]
+    I -->|"releaseable"| J["⑩ Cloudflare Pagesデプロイ準備・可否確認"]
+    I -->|"fix required"| K["Phase 9 NG対応"]
+    K -->|"Integration Review再実行"| I
 ```
 
 ### 制約
@@ -94,7 +96,11 @@ project/
 │  │  │  └─ SKILL.md
 │  │  ├─ finalize-task/
 │  │  │  └─ SKILL.md
+│  │  ├─ reopen-task/
+│  │  │  └─ SKILL.md
 │  │  ├─ integration-review/
+│  │  │  └─ SKILL.md
+│  │  ├─ remediate-integration-review/
 │  │  │  └─ SKILL.md
 │  │  └─ deploy-readiness/
 │  │     └─ SKILL.md
@@ -994,6 +1000,29 @@ CodexのメインスレッドでMVP全体レビューを管理してください
 変更しないでください。
 ```
 
+## NG時のCodex用プロンプト
+
+Integration Reviewが`MVP releaseable: No`かつ`Next step: fix required`で終了した場合だけ使用する。
+詳細な復帰手順は`remediate-integration-review` Skillを正本とし、ここには実行ごとに変わる入力だけを記載する。
+
+```
+/goal
+
+$remediate-integration-review を使用し、
+Phase 9のNG対応からIntegration Reviewの再通過まで進めてください。
+
+Integration Review:
+[最新のIntegration Review成果物パス、添付ファイル、または結果全文]
+
+対象Task:
+[Taskパス。Reviewから安全に特定できる場合は「Reviewから特定」]
+
+push、PR作成、merge、deployは行わないでください。
+```
+
+`Next step: user decision required`の場合は、このプロンプトを実行せず、
+Integration Reviewが示した判断を先に確定する。
+
 ---
 
 # 14. Phase 10：Cloudflare Pagesデプロイ準備・可否確認
@@ -1400,18 +1429,28 @@ ChatGPT Work（手動Phase実行）
      ▼
 統合レビュー（読み取り調査を最大3並列）
      │
-     ▼
-npm run build
+     ├─ MVP releaseable: Yes / Next step: proceed
+     │   │
+     │   ▼
+     │  npm run build
+     │   │
+     │   ▼
+     │  GitHub
+     │   │
+     │   ▼
+     │  Cloudflare Pages
+     │  デプロイ可否確認
+     │   │
+     │   ▼
+     │  手順完了
      │
-     ▼
-GitHub
-     │
-     ▼
-Cloudflare Pages
-デプロイ可否確認
-     │
-     ▼
-手順完了
+     └─ MVP releaseable: No / Next step: fix required
+         │
+         ▼
+        Integration Review remediation
+        （Task再開 → Fix → Feature Review → Finalize）
+         │
+         └──── 統合レビューへ戻る
 ```
 
 ---

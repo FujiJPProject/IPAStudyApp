@@ -47,7 +47,7 @@ flowchart TD
 - **fixer**
   - Reviewで確認されたCritical / Highの修正だけを担当する
 - **finalizer**
-  - 完了Gateを確認し、指定TaskのStatusとCompletion Evidenceだけを更新する
+  - 完了Gateを確認して指定TaskをDoneにし、Integration ReviewのMandatory fixでは再開Gateを確認してDone TaskをReadyへ戻す
 - **release-auditor**
   - アプリ全体またはデプロイ可否を確認し、アプリケーションコードは変更しない
 
@@ -73,8 +73,12 @@ flowchart TD
   - ReviewerのCritical / High指摘を検証し、必要最小限のFixを行う
 - **finalize-task**
   - 最新Reviewと検証結果を確認し、条件を満たすTaskを`Done`にする
+- **reopen-task**
+  - Integration ReviewのMandatory fixに対応するDone Taskを、証跡を保って`Ready`へ戻す
 - **integration-review**
   - プロンプト手順のPhase 9でMVP全体を横断して確認する
+- **remediate-integration-review**
+  - Phase 9のNG後にMandatory fix、Feature Review、Finalize、統合レビュー再実行を管理する
 - **deploy-readiness**
   - プロンプト手順のPhase 10でCloudflare Pagesへのデプロイ可否を確認する
 
