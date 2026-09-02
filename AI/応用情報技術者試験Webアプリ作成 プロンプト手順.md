@@ -30,7 +30,9 @@ graph TD
     F --> G["⑦ レビュー指摘修正"]
     G --> H["⑧ 機能追加サイクル"]
     H --> I["⑨ 全体統合レビュー"]
-    I --> J["⑩ Cloudflare Pagesデプロイ準備・可否確認"]
+    I -->|"releaseable"| J["⑩ Cloudflare Pagesデプロイ準備・可否確認"]
+    I -->|"fix required"| K["Phase 9 NG対応"]
+    K -->|"Integration Review再実行"| I
 ```
 
 ### 制約
@@ -94,7 +96,11 @@ project/
 │  │  │  └─ SKILL.md
 │  │  ├─ finalize-task/
 │  │  │  └─ SKILL.md
+│  │  ├─ reopen-task/
+│  │  │  └─ SKILL.md
 │  │  ├─ integration-review/
+│  │  │  └─ SKILL.md
+│  │  ├─ remediate-integration-review/
 │  │  │  └─ SKILL.md
 │  │  └─ deploy-readiness/
 │  │     └─ SKILL.md
@@ -1423,18 +1429,28 @@ ChatGPT Work（手動Phase実行）
      ▼
 統合レビュー（読み取り調査を最大3並列）
      │
-     ▼
-npm run build
+     ├─ MVP releaseable: Yes / Next step: proceed
+     │   │
+     │   ▼
+     │  npm run build
+     │   │
+     │   ▼
+     │  GitHub
+     │   │
+     │   ▼
+     │  Cloudflare Pages
+     │  デプロイ可否確認
+     │   │
+     │   ▼
+     │  手順完了
      │
-     ▼
-GitHub
-     │
-     ▼
-Cloudflare Pages
-デプロイ可否確認
-     │
-     ▼
-手順完了
+     └─ MVP releaseable: No / Next step: fix required
+         │
+         ▼
+        Integration Review remediation
+        （Task再開 → Fix → Feature Review → Finalize）
+         │
+         └──── 統合レビューへ戻る
 ```
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: remediate-integration-review
-description: Manage remediation after an Integration Review returns MVP releaseable: No and Next step: fix required.
+description: "Manage remediation after an Integration Review returns MVP releaseable: No and Next step: fix required."
 ---
 
 # Remediate Integration Review
@@ -53,19 +53,28 @@ Do not begin a Task reopen or code change. Consolidate the questions and stop wh
 
 Medium, Low, and deferrable improvements are not part of this remediation unless they are necessary to satisfy a listed Required closure.
 
+## Task Order
+
+Build a dependency order for the affected Tasks before any write.
+
+- If Task A depends on Task B and both are affected, fully remediate and finalize B before reopening A.
+- Do not reopen a Task until every dependency is `Done` and no dependency is awaiting remediation.
+- Process Task writes one at a time in that dependency order.
+
 ## Procedure
 
-For each affected Task, process write operations serially:
+For each affected Task in dependency order:
 
 1. Delegate `reopen-task` to the Finalizer with the Task and Integration Review.
 2. Delegate `fix-review` to the Fixer with only that Task's Mandatory findings.
 3. Require `npm run test` and `npm run build`.
 4. Delegate `review-feature` to the Reviewer for the current implementation.
-5. If the Feature Review is not exactly `Next step: proceed`, return to step 2.
-6. Delegate `finalize-task` to the Finalizer. The Task must be `Done` again with new Completion Evidence before continuing.
-7. After every affected Task is finalized, delegate `integration-review` to the Release Auditor and create a new, non-overwriting Integration Review artifact.
-8. If the new review is `MVP releaseable: No` and `Next step: fix required`, repeat this Skill from the Start Gate using that new artifact.
-9. If the new review is `Next step: user decision required`, stop and present the consolidated decision request.
+5. If the Feature Review concludes exactly `Next step: fix Critical / High`, return to step 2. Allow at most two Fixer-to-Reviewer cycles for the Task.
+6. If Critical / High remains after the second cycle, or the Feature Review produces an unexpected decision, stop and report the remaining evidence and required user decision.
+7. Delegate `finalize-task` to the Finalizer only after the Feature Review concludes exactly `Next step: proceed`. The Task must be `Done` again with new Completion Evidence before continuing.
+8. After every affected Task is finalized, delegate `integration-review` to the Release Auditor and create a new, non-overwriting Integration Review artifact.
+9. If the new review is `MVP releaseable: No` and `Next step: fix required`, repeat this Skill from the Start Gate using that new artifact.
+10. If the new review is `Next step: user decision required`, stop and present the consolidated decision request.
 
 The parent Orchestrator manages the state transitions but does not edit Tasks, Review artifacts, Source of Truth, or application code itself.
 
