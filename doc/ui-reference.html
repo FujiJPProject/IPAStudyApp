@@ -17,6 +17,9 @@
       --primary-soft: #edf3ff;
       --accent: #d97706;
       --accent-soft: #fff7e8;
+      --compare: #f59e0b;
+      --change: #dc2626;
+      --normal: #94a3b8;
       --success: #15803d;
       --success-soft: #ecfdf3;
       --danger: #b42318;
@@ -298,9 +301,9 @@
       font-weight: 700;
     }
     .legend span { display: inline-flex; align-items: center; gap: 6px; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 4px; background: #d8e2f3; }
-    .legend-dot.compare { background: #f59e0b; }
-    .legend-dot.changed { background: #7c3aed; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 4px; background: var(--normal); }
+    .legend-dot.compare { background: var(--compare); }
+    .legend-dot.changed { background: var(--change); }
     .legend-dot.done { background: #16a34a; }
 
     .bars-wrap {
@@ -330,11 +333,11 @@
       position: relative;
       min-height: 42px;
       border-radius: 10px 10px 4px 4px;
-      background: #d8e2f3;
+      background: var(--normal);
       transition: height .18s ease, background .18s ease, transform .18s ease;
     }
-    .bar.compare { background: #f59e0b; transform: translateY(-4px); }
-    .bar.changed { background: #7c3aed; transform: translateY(-4px); }
+    .bar.compare { background: var(--compare); transform: translateY(-4px); }
+    .bar.changed { background: var(--change); transform: translateY(-4px); }
     .bar.done { background: #16a34a; }
     .bar-value {
       position: absolute;
@@ -361,8 +364,9 @@
       position: sticky;
       bottom: 10px;
       z-index: 5;
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
       gap: 10px;
       margin-top: 16px;
       padding: 12px;
@@ -372,7 +376,39 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
     }
-    .controls .btn { width: 100%; }
+    .control-buttons { display: flex; flex: 1 1 430px; flex-wrap: wrap; gap: 8px; }
+    .speed-control { display: grid; flex: 1 1 210px; gap: 4px; color: var(--text-sub); font-size: 12px; font-weight: 700; }
+    .speed-label { display: flex; justify-content: space-between; gap: 12px; }
+    .speed-control input { min-height: 40px; width: 100%; accent-color: var(--primary); }
+
+    .algorithm-select {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-muted);
+      color: var(--text);
+      padding: 9px 12px;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .variables-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .variable-card { min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); padding: 9px 10px; }
+    .variable-name { color: var(--text-sub); font-size: 11px; font-weight: 700; }
+    .variable-value { overflow-wrap: anywhere; font-weight: 900; }
+    .bar-vars { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .bar-var { border: 1px solid var(--line); border-radius: 8px; background: var(--surface-muted); padding: 4px 8px; color: var(--text-sub); font-size: 11px; font-weight: 700; }
+
+    .flow-legend { display: flex; flex-wrap: wrap; gap: 8px 12px; color: var(--text-sub); font-size: 11px; font-weight: 700; }
+    .flow-list { display: grid; justify-items: center; gap: 6px; margin-top: 12px; }
+    .flow-shape { position: relative; display: grid; width: min(100%, 260px); min-height: 48px; place-items: center; border: 2px solid var(--line); background: var(--surface-muted); padding: 8px 16px; text-align: center; font-size: 12px; font-weight: 800; }
+    .flow-shape.process { border-radius: 9px; }
+    .flow-shape.terminal { border-radius: 999px; }
+    .flow-shape.decision { min-height: 72px; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); padding-inline: 50px; }
+    .flow-shape.repeat { clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
+    .flow-shape.active { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+    .flow-arrow { color: var(--text-sub); line-height: 1; }
 
     .explain-panel { overflow: hidden; }
     .explain-section {
@@ -457,8 +493,8 @@
       .condition-box { grid-template-columns: 1fr; }
       .bars-wrap { height: 250px; gap: 7px; padding-inline: 7px; }
       .bar-value { font-size: 12px; }
-      .controls { grid-template-columns: 1fr 1fr; }
-      .controls .reset-btn { grid-column: 1 / -1; }
+      .control-buttons { flex-basis: 100%; }
+      .control-buttons .btn { flex: 1 1 calc(50% - 8px); }
       .panel-head, .visual-body, .explain-section { padding-left: 16px; padding-right: 16px; }
     }
 
@@ -470,8 +506,13 @@
       .hero-actions, .button-row { flex-direction: column; }
       .hero-actions .btn, .button-row .btn { width: 100%; }
       .bars-wrap { height: 235px; gap: 5px; }
-      .controls { grid-template-columns: 1fr; }
-      .controls .reset-btn { grid-column: auto; }
+      .variables-grid { grid-template-columns: 1fr; }
+      .control-buttons .btn { flex-basis: 100%; width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .bar, .btn { transition: none; }
     }
   </style>
 </head>
@@ -498,7 +539,7 @@
           <h1>処理を1ステップずつ進めて、<br>「なぜそうなるのか」を理解する。</h1>
           <p class="lead">
             文章だけでは追いにくいアルゴリズムや内部状態の変化を、処理の流れに沿って可視化する学習アプリです。
-            まずは固定された教材データを使い、結果だけでなく途中経過を確認します。
+            教材表示時に生成される同じ配列を使って複数のアルゴリズムを切り替え、結果だけでなく途中経過を確認します。
           </p>
           <div class="hero-actions">
             <button class="btn btn-primary" data-go="materials">学習を始める</button>
@@ -535,7 +576,7 @@
           <div class="card">
             <div class="eyebrow">MVP教材</div>
             <h2>ソートアルゴリズム可視化</h2>
-            <p>配列内の値を比較し、必要に応じて交換しながら整列されていく様子を、1ステップずつ確認します。</p>
+            <p>7種類のソートを切り替え、同じ配列がそれぞれの規則で整列されていく様子を1ステップずつ確認します。</p>
             <div class="button-row">
               <button class="btn btn-primary" data-open-material="sort-visualizer">この教材を開く</button>
               <button class="btn btn-secondary" data-go="materials">学習一覧を見る</button>
@@ -543,7 +584,7 @@
           </div>
         </section>
 
-        <p class="prototype-note">UI確認用プロトタイプ：認証・問題演習・学習分析・自由入力は含みません。</p>
+        <p class="prototype-note">UI確認用プロトタイプ：認証・問題演習・学習分析・自由入力は含みません。教材固有Domainと本番状態管理はこのHTMLのJavaScript構造を流用しません。</p>
       </div>
     </section>
 
@@ -573,7 +614,7 @@
             <div class="eyebrow">Visualization Material</div>
             <div class="tag" id="material-field">アルゴリズム</div>
             <h1 id="material-title" style="margin-top:10px;">ソートアルゴリズム可視化</h1>
-            <p id="material-summary">配列の比較と交換をステップ単位で確認し、整列までの流れを理解します。</p>
+            <p id="material-summary">7種類のソートについて、変数、比較、交換・移動・書き込み、整列までの流れを確認します。</p>
           </div>
           <button class="back-link" data-go="materials">← 学習一覧へ戻る</button>
         </div>
@@ -583,7 +624,7 @@
             <div class="panel-head">
               <div>
                 <h2 id="visual-title">状態変化の可視化</h2>
-                <p>固定データを使い、比較と交換を1ステップずつ確認します。</p>
+                <p>表示時に生成された同じ配列を使い、7種類の処理を1ステップずつ確認します。</p>
               </div>
               <span id="run-status" class="status-badge">開始前</span>
             </div>
@@ -591,34 +632,68 @@
             <div class="visual-body">
               <div class="condition-box" aria-label="初期状態と条件">
                 <div class="condition-item">
-                  <div class="condition-label">初期配列</div>
-                  <div class="condition-value mono">[5, 2, 4, 1, 3]</div>
+                  <div class="condition-label">今回の基準配列（表示時にランダム生成）</div>
+                  <div id="initial-array" class="condition-value mono">[7, 3, 9, 2, 6, 4, 8, 1, 5]</div>
                 </div>
                 <div class="condition-item">
-                  <div class="condition-label">今回確認すること</div>
-                  <div class="condition-value">隣り合う値の比較と交換</div>
+                  <label class="condition-label" for="algorithm-select">アルゴリズム選択</label>
+                  <select id="algorithm-select" class="algorithm-select">
+                    <option value="bubble">バブルソート</option>
+                    <option value="selection">選択ソート</option>
+                    <option value="insertion">挿入ソート</option>
+                    <option value="quick">クイックソート</option>
+                    <option value="merge">マージソート</option>
+                    <option value="heap">ヒープソート</option>
+                    <option value="shell">シェルソート</option>
+                  </select>
                 </div>
               </div>
 
               <div class="legend" aria-label="色の意味">
                 <span><i class="legend-dot"></i>通常</span>
                 <span><i class="legend-dot compare"></i>比較中</span>
-                <span><i class="legend-dot changed"></i>交換あり</span>
-                <span><i class="legend-dot done"></i>最終結果</span>
+                <span><i class="legend-dot changed"></i>交換・移動・書き込み</span>
+                <span><i class="legend-dot done"></i><span id="settled-legend">位置確定</span></span>
+              </div>
+
+              <div class="condition-label">バーに関係する現在の変数</div>
+              <div id="bar-vars" class="bar-vars" aria-live="polite">
+                <span class="bar-var">比較位置 = 0</span>
+                <span class="bar-var">右の位置 = 1</span>
               </div>
 
               <div id="bars" class="bars-wrap" aria-live="polite" aria-label="配列の状態を表す棒グラフ"></div>
-              <div id="array-view" class="array-view mono" aria-label="現在の配列">[5, 2, 4, 1, 3]</div>
+              <div id="array-view" class="array-view mono" aria-label="現在の配列">[7, 3, 9, 2, 6, 4, 8, 1, 5]</div>
 
               <div class="controls" aria-label="教材操作">
-                <button id="start-btn" class="btn btn-primary">処理を開始</button>
-                <button id="step-btn" class="btn btn-primary" disabled>1ステップ実行</button>
-                <button id="reset-btn" class="btn btn-secondary reset-btn">初期状態に戻す</button>
+                <div class="control-buttons">
+                  <button id="start-btn" class="btn btn-primary">処理を開始</button>
+                  <button id="step-btn" class="btn btn-primary" disabled>1ステップ実行</button>
+                  <button id="play-btn" class="btn btn-secondary" disabled>▶ 自動再生</button>
+                  <button id="restart-btn" class="btn btn-secondary">最初から</button>
+                  <button id="shuffle-btn" class="btn btn-secondary">シャッフル</button>
+                </div>
+                <label class="speed-control" for="speed-range">
+                  <span class="speed-label"><span>再生速度</span><span id="speed-label" class="mono">600 ms</span></span>
+                  <input id="speed-range" type="range" min="100" max="1200" step="50" value="600" aria-label="自動再生速度" />
+                </label>
               </div>
             </div>
           </section>
 
           <aside class="explain-panel" aria-label="現在の処理と解説">
+            <div class="explain-section">
+              <div class="eyebrow">Variables</div>
+              <h3>現在の処理と変数</h3>
+              <p>変数は役割が分かる日本語名で表示し、位置を表す変数はバーにも対応付けます。</p>
+              <div id="variables" class="variables-grid">
+                <div class="variable-card"><div class="variable-name">外側の繰り返し位置</div><div class="variable-value mono">0</div></div>
+                <div class="variable-card"><div class="variable-name">比較位置</div><div class="variable-value mono">0</div></div>
+                <div class="variable-card"><div class="variable-name">左の値</div><div class="variable-value mono">7</div></div>
+                <div class="variable-card"><div class="variable-name">右の値</div><div class="variable-value mono">3</div></div>
+              </div>
+            </div>
+
             <div class="explain-section">
               <div class="eyebrow">Current Step</div>
               <h3>現在の処理内容</h3>
@@ -631,7 +706,17 @@
             <div class="explain-section">
               <div class="eyebrow">Step Progress</div>
               <h3>ステップ状況</h3>
-              <p id="step-progress">0 / 10 ステップ</p>
+              <p id="step-progress">Step 0 / 0</p>
+            </div>
+
+            <div class="explain-section">
+              <div class="eyebrow">Flowchart</div>
+              <h3>高水準フローチャート</h3>
+              <p>可読性を優先し、実際の分岐と反復だけを専用図形で表します。再帰を直線的な反復として表しません。</p>
+              <div class="flow-legend" aria-label="フローチャート図形の意味">
+                <span>端子：開始・終了</span><span>◇：条件分岐</span><span>反復形：反復</span><span>▭：処理</span>
+              </div>
+              <div id="flow-list" class="flow-list" aria-live="polite"></div>
             </div>
 
             <div class="explain-section">
@@ -687,13 +772,52 @@
           id: 'sort-visualizer',
           name: 'ソートアルゴリズム可視化',
           field: 'アルゴリズム',
-          summary: '配列内の値を比較し、必要に応じて交換しながら整列されるまでの状態変化を1ステップずつ確認します。'
+          summary: '7種類のソートについて、変数、比較、交換・移動・書き込み、整列までの流れを確認します。'
         }
       ];
 
-      const sortMaterial = {
-        initial: [5, 2, 4, 1, 3]
+      const algorithmPresentation = {
+        bubble: {
+          settled: '位置確定',
+          flow: [['開始', 'terminal'], ['未確定範囲を反復', 'repeat'], ['隣接値を比較', 'decision'], ['必要なら交換', 'process'], ['末尾位置を確定', 'process'], ['完了', 'terminal']]
+        },
+        selection: {
+          settled: '位置確定',
+          flow: [['開始', 'terminal'], ['確定位置を反復', 'repeat'], ['最小候補を探索', 'decision'], ['最小値を移動', 'process'], ['先頭位置を確定', 'process'], ['完了', 'terminal']]
+        },
+        insertion: {
+          settled: '整列済み範囲',
+          flow: [['開始', 'terminal'], ['挿入値を反復', 'repeat'], ['左の値と比較', 'decision'], ['値を右へ移動', 'process'], ['挿入値を書き込む', 'process'], ['完了', 'terminal']]
+        },
+        quick: {
+          settled: '位置確定',
+          flow: [['開始', 'terminal'], ['処理範囲を決定', 'process'], ['基準値と比較', 'decision'], ['基準値の位置を確定', 'process'], ['左右の範囲を再帰処理', 'process'], ['完了', 'terminal']]
+        },
+        merge: {
+          settled: '整列済み範囲',
+          flow: [['開始', 'terminal'], ['範囲を左右へ再帰分割', 'process'], ['左右候補を比較', 'decision'], ['小さい値を書き込む', 'process'], ['範囲を結合', 'process'], ['完了', 'terminal']]
+        },
+        heap: {
+          settled: '位置確定',
+          flow: [['開始', 'terminal'], ['最大ヒープを構築', 'repeat'], ['親と子を比較', 'decision'], ['必要なら交換', 'process'], ['最大値を末尾へ抽出', 'repeat'], ['末尾位置を確定', 'process'], ['完了', 'terminal']]
+        },
+        shell: {
+          settled: '整列済み範囲',
+          flow: [['開始', 'terminal'], ['gapを 4 → 2 → 1 に変更', 'repeat'], ['gapだけ離れた値を比較', 'decision'], ['値を移動・書き込み', 'process'], ['gap 1 の処理を完了', 'process'], ['完了', 'terminal']]
+        }
       };
+
+      const completionCopy = {
+        bubble: { why: '隣り合う値を比較して大きい値を右へ送る反復により、末尾から順に位置が確定します。', insight: '比較と交換の積み重ねで、大きい値が未確定範囲の右端へ移動する様子を確認できます。' },
+        selection: { why: '未確定範囲から最小値を選び、先頭へ移動するたびに1つの位置が確定します。', insight: '比較回数と実際の交換回数が別であることを、最小候補の変化から確認できます。' },
+        insertion: { why: '整列済み範囲の適切な位置へ値を挿入し、その範囲を1つずつ広げます。', insight: '値を直接交換するだけでなく、既存の値を移動して空いた位置へ書き込む処理を確認できます。' },
+        quick: { why: '基準値より小さい側と大きい側へ分け、左右の範囲を再帰的に同じ方法で整列します。', insight: '基準値の位置が確定すると、以後その位置をまたいだ比較が不要になることを確認できます。' },
+        merge: { why: '配列を小さな範囲へ再帰的に分割し、整列済みの左右から小さい値を順に書き込んで結合します。', insight: '比較対象が元の隣接位置に限られず、分割した範囲の先頭候補になることを確認できます。' },
+        heap: { why: '最大ヒープを作り、根の最大値を末尾へ繰り返し抽出することで右側から位置を確定します。', insight: '配列上の親子関係を使って最大候補を根へ集める構築フェーズと、抽出フェーズを区別できます。' },
+        shell: { why: '大きなgapで離れた値を先に整え、gapを半減して最後にgap 1の挿入ソートで全体を整列します。', insight: '4、2、1と比較間隔が縮まり、離れた位置の値を早い段階で移動できる様子を確認できます。' }
+      };
+
+      let baseArray = createRandomPermutation();
 
       const screens = [...document.querySelectorAll('.screen')];
       const navButtons = [...document.querySelectorAll('.nav-btn')];
@@ -705,56 +829,242 @@
       const runStatus = document.getElementById('run-status');
       const startBtn = document.getElementById('start-btn');
       const stepBtn = document.getElementById('step-btn');
-      const resetBtn = document.getElementById('reset-btn');
       const currentAction = document.getElementById('current-action');
       const stepProgress = document.getElementById('step-progress');
       const finalResult = document.getElementById('final-result');
       const whyBlock = document.getElementById('why-block');
       const insightBlock = document.getElementById('insight-block');
+      const algorithmSelect = document.getElementById('algorithm-select');
+      const initialArray = document.getElementById('initial-array');
+      const variables = document.getElementById('variables');
+      const barVars = document.getElementById('bar-vars');
+      const settledLegend = document.getElementById('settled-legend');
+      const flowList = document.getElementById('flow-list');
+      const playBtn = document.getElementById('play-btn');
+      const restartBtn = document.getElementById('restart-btn');
+      const shuffleBtn = document.getElementById('shuffle-btn');
+      const speedRange = document.getElementById('speed-range');
+      const speedLabel = document.getElementById('speed-label');
+
+      let timer = null;
 
       let state = createInitialRunState();
 
       function createInitialRunState() {
-        const steps = buildSortSteps(sortMaterial.initial);
+        const steps = buildSortSteps(baseArray, algorithmSelect.value);
         return {
-          array: [...sortMaterial.initial],
+          array: [...baseArray],
           steps,
           stepIndex: 0,
           started: false,
           completed: false,
           highlight: [],
-          swapped: false
+          kind: 'phase',
+          action: false,
+          settled: [],
+          settledKind: 'position',
+          variables: {},
+          flowIndex: 0
         };
       }
 
-      // プロトタイプ用の簡易教材ロジック。
-      // 固定配列に対して、隣接要素を比較して必要なら交換するステップ列を事前生成する。
-      function buildSortSteps(initial) {
-        const work = [...initial];
-        const steps = [];
-        for (let pass = 0; pass < work.length - 1; pass += 1) {
-          for (let i = 0; i < work.length - 1 - pass; i += 1) {
-            const left = work[i];
-            const right = work[i + 1];
-            const swapped = left > right;
-            if (swapped) {
-              work[i] = right;
-              work[i + 1] = left;
+      // UI確認用のtrace。配置と状態遷移の参照であり、本番Domainの構造として流用しない。
+      function createRandomPermutation() {
+        const values = Array.from({ length: 9 }, (_, index) => index + 1);
+        for (let index = values.length - 1; index > 0; index -= 1) {
+          const target = Math.floor(Math.random() * (index + 1));
+          [values[index], values[target]] = [values[target], values[index]];
+        }
+        return values;
+      }
+
+      function shot(array, kind, indices, title, text, currentVariables = {}, settled = [], settledKind = 'position', flowIndex = 0) {
+        return { result: [...array], kind, indices, title, text, variables: currentVariables, settled: [...settled], settledKind, flowIndex };
+      }
+
+      function buildSortSteps(initial, algorithm) {
+        if (algorithm === 'selection') return selectionSteps(initial);
+        if (algorithm === 'insertion') return insertionSteps(initial);
+        if (algorithm === 'quick') return quickSteps(initial);
+        if (algorithm === 'merge') return mergeSteps(initial);
+        if (algorithm === 'heap') return heapSteps(initial);
+        if (algorithm === 'shell') return shellSteps(initial);
+        return bubbleSteps(initial);
+      }
+
+      function doneStep(array, flowIndex) {
+        return shot(array, 'settled', [], 'ソート完了', 'すべての値が昇順に並びました。', { 状態: '完了' }, array.map((_, index) => index), 'position', flowIndex);
+      }
+
+      function bubbleSteps(initial) {
+        const array = [...initial], steps = [], settled = [];
+        for (let end = array.length - 1; end > 0; end -= 1) {
+          steps.push(shot(array, 'phase', [], '未確定範囲を走査', `index 0 から ${end} までを確認します。`, { 未確定範囲の右端: end }, settled, 'position', 1));
+          for (let index = 0; index < end; index += 1) {
+            steps.push(shot(array, 'compare', [index, index + 1], '隣り合う値を比較', `${array[index]} と ${array[index + 1]} を比較します。`, { 比較位置: index, 右の位置: index + 1, 左の値: array[index], 右の値: array[index + 1] }, settled, 'position', 2));
+            if (array[index] > array[index + 1]) {
+              [array[index], array[index + 1]] = [array[index + 1], array[index]];
+              steps.push(shot(array, 'action', [index, index + 1], '2つの値を交換', '左の値が大きいため交換しました。', { 交換元位置: index, 交換先位置: index + 1 }, settled, 'position', 3));
             }
-            steps.push({
-              indices: [i, i + 1],
-              left,
-              right,
-              swapped,
-              result: [...work],
-              pass: pass + 1
-            });
+          }
+          settled.unshift(end);
+          steps.push(shot(array, 'settled', [end], '末尾位置を確定', `index ${end} の位置が確定しました。`, { 確定した位置: end }, settled, 'position', 4));
+        }
+        return [...steps, doneStep(array, 5)];
+      }
+
+      function selectionSteps(initial) {
+        const array = [...initial], steps = [], settled = [];
+        for (let fixed = 0; fixed < array.length - 1; fixed += 1) {
+          let minimum = fixed;
+          steps.push(shot(array, 'phase', [fixed], '最小値を探索', `index ${fixed} に置く最小値を探します。`, { 確定する位置: fixed, 最小候補位置: minimum }, settled, 'position', 1));
+          for (let scan = fixed + 1; scan < array.length; scan += 1) {
+            steps.push(shot(array, 'compare', [minimum, scan], '最小候補と比較', `${array[scan]} と最小候補 ${array[minimum]} を比較します。`, { 探索位置: scan, 最小候補位置: minimum }, settled, 'position', 2));
+            if (array[scan] < array[minimum]) minimum = scan;
+          }
+          if (minimum !== fixed) {
+            [array[fixed], array[minimum]] = [array[minimum], array[fixed]];
+            steps.push(shot(array, 'action', [fixed, minimum], '最小値を移動', '最小値を確定する位置へ移動しました。', { 確定する位置: fixed, 最小候補位置: minimum }, settled, 'position', 3));
+          }
+          settled.push(fixed);
+          steps.push(shot(array, 'settled', [fixed], '位置を確定', `index ${fixed} の位置が確定しました。`, { 確定した位置: fixed }, settled, 'position', 4));
+        }
+        return [...steps, doneStep(array, 5)];
+      }
+
+      function insertionSteps(initial) {
+        const array = [...initial], steps = [];
+        for (let target = 1; target < array.length; target += 1) {
+          const value = array[target];
+          let cursor = target - 1;
+          steps.push(shot(array, 'phase', [target], '挿入する値を取得', `${value} を整列済み範囲へ挿入します。`, { 挿入対象位置: target, 挿入する値: value }, Array.from({ length: target }, (_, index) => index), 'range', 1));
+          while (cursor >= 0) {
+            steps.push(shot(array, 'compare', [cursor, cursor + 1], '左の値と比較', `${array[cursor]} と挿入する値 ${value} を比較します。`, { 比較位置: cursor, 挿入する値: value }, [], 'range', 2));
+            if (array[cursor] <= value) break;
+            array[cursor + 1] = array[cursor];
+            steps.push(shot(array, 'action', [cursor, cursor + 1], '値を右へ移動', `${array[cursor]} を1つ右へ移動しました。`, { 移動元位置: cursor, 移動先位置: cursor + 1 }, [], 'range', 3));
+            cursor -= 1;
+          }
+          array[cursor + 1] = value;
+          steps.push(shot(array, 'action', [cursor + 1], '挿入値を書き込む', `${value} をindex ${cursor + 1} へ書き込みました。`, { 書き込み位置: cursor + 1, 書き込んだ値: value }, Array.from({ length: target + 1 }, (_, index) => index), 'range', 4));
+        }
+        return [...steps, doneStep(array, 5)];
+      }
+
+      function quickSteps(initial) {
+        const array = [...initial], steps = [], settled = new Set();
+        function sort(left, right) {
+          if (left > right) return;
+          if (left === right) {
+            settled.add(left);
+            steps.push(shot(array, 'settled', [left], '1要素の位置を確定', `index ${left} の位置が確定しました。`, { 確定した位置: left }, [...settled], 'position', 3));
+            return;
+          }
+          const pivot = array[right];
+          let boundary = left;
+          steps.push(shot(array, 'phase', [right], '処理範囲と基準値を決定', `index ${left} から ${right} を処理し、${pivot} を基準値にします。`, { 左端位置: left, 右端位置: right, 基準値位置: right, 基準値: pivot }, [...settled], 'position', 1));
+          for (let scan = left; scan < right; scan += 1) {
+            steps.push(shot(array, 'compare', [scan, right], '基準値と比較', `${array[scan]} が基準値 ${pivot} 以下か確認します。`, { 探索位置: scan, 境界位置: boundary, 基準値位置: right }, [...settled], 'position', 2));
+            if (array[scan] <= pivot) {
+              if (scan !== boundary) {
+                [array[scan], array[boundary]] = [array[boundary], array[scan]];
+                steps.push(shot(array, 'action', [scan, boundary], '左側領域へ移動', '基準値以下の値を左側領域へ移動しました。', { 探索位置: scan, 移動先位置: boundary }, [...settled], 'position', 3));
+              }
+              boundary += 1;
+            }
+          }
+          [array[boundary], array[right]] = [array[right], array[boundary]];
+          settled.add(boundary);
+          steps.push(shot(array, 'action', [boundary, right], '基準値を確定位置へ移動', `基準値 ${pivot} をindex ${boundary} へ移動しました。`, { 基準値の確定位置: boundary }, [...settled], 'position', 3));
+          steps.push(shot(array, 'phase', [], '左右を再帰処理', '基準値の左右の範囲を同じ方法で処理します。', { 左端位置: left, 基準値の確定位置: boundary, 右端位置: right }, [...settled], 'position', 4));
+          sort(left, boundary - 1);
+          sort(boundary + 1, right);
+        }
+        sort(0, array.length - 1);
+        return [...steps, doneStep(array, 5)];
+      }
+
+      function mergeSteps(initial) {
+        const array = [...initial], steps = [];
+        function sort(left, right) {
+          if (left >= right) return;
+          const middle = Math.floor((left + right) / 2);
+          steps.push(shot(array, 'phase', [left, middle, right], '範囲を再帰分割', `index ${left} から ${right} を左右へ分割します。`, { 左端位置: left, 中央位置: middle, 右端位置: right }, [], 'range', 1));
+          sort(left, middle);
+          sort(middle + 1, right);
+          const leftValues = array.slice(left, middle + 1), rightValues = array.slice(middle + 1, right + 1);
+          let leftIndex = 0, rightIndex = 0, write = left;
+          while (leftIndex < leftValues.length && rightIndex < rightValues.length) {
+            steps.push(shot(array, 'compare', [left + leftIndex, middle + 1 + rightIndex], '左右候補を比較', `${leftValues[leftIndex]} と ${rightValues[rightIndex]} を比較します。`, { 左側候補位置: left + leftIndex, 右側候補位置: middle + 1 + rightIndex, 書き込み位置: write }, [], 'range', 2));
+            array[write] = leftValues[leftIndex] <= rightValues[rightIndex] ? leftValues[leftIndex++] : rightValues[rightIndex++];
+            steps.push(shot(array, 'action', [write], '小さい値を書き込む', `${array[write]} をindex ${write} へ書き込みました。`, { 書き込み位置: write, 書き込んだ値: array[write] }, [], 'range', 3));
+            write += 1;
+          }
+          while (leftIndex < leftValues.length) array[write++] = leftValues[leftIndex++];
+          while (rightIndex < rightValues.length) array[write++] = rightValues[rightIndex++];
+          const range = Array.from({ length: right - left + 1 }, (_, index) => left + index);
+          steps.push(shot(array, 'settled', range, '範囲を結合', `index ${left} から ${right} が整列済みになりました。`, { 結合した左端位置: left, 結合した右端位置: right }, range, 'range', 4));
+        }
+        sort(0, array.length - 1);
+        return [...steps, doneStep(array, 5)];
+      }
+
+      function heapSteps(initial) {
+        const array = [...initial], steps = [], settled = [];
+        function heapify(size, root, flowIndex) {
+          let largest = root;
+          const left = root * 2 + 1, right = root * 2 + 2;
+          if (left < size) {
+            steps.push(shot(array, 'compare', [largest, left], '親と左の子を比較', `${array[largest]} と ${array[left]} を比較します。`, { ヒープサイズ: size, 親位置: root, 左の子位置: left }, settled, 'position', 2));
+            if (array[left] > array[largest]) largest = left;
+          }
+          if (right < size) {
+            steps.push(shot(array, 'compare', [largest, right], '最大候補と右の子を比較', `${array[largest]} と ${array[right]} を比較します。`, { ヒープサイズ: size, 最大候補位置: largest, 右の子位置: right }, settled, 'position', 2));
+            if (array[right] > array[largest]) largest = right;
+          }
+          if (largest !== root) {
+            [array[root], array[largest]] = [array[largest], array[root]];
+            steps.push(shot(array, 'action', [root, largest], '親子を交換', '大きい子を親の位置へ移動しました。', { 交換元位置: largest, 交換先位置: root }, settled, 'position', flowIndex));
+            heapify(size, largest, flowIndex);
           }
         }
-        return steps;
+        for (let root = Math.floor(array.length / 2) - 1; root >= 0; root -= 1) {
+          steps.push(shot(array, 'phase', [root], '最大ヒープを構築', `index ${root} を根とする部分をヒープ化します。`, { ヒープ化する根位置: root }, settled, 'position', 1));
+          heapify(array.length, root, 3);
+        }
+        for (let end = array.length - 1; end > 0; end -= 1) {
+          [array[0], array[end]] = [array[end], array[0]];
+          steps.push(shot(array, 'action', [0, end], '最大値を末尾へ抽出', `最大値をindex ${end} へ移動しました。`, { 抽出元位置: 0, 確定候補位置: end }, settled, 'position', 4));
+          settled.unshift(end);
+          steps.push(shot(array, 'settled', [end], '末尾位置を確定', `index ${end} の位置が確定しました。`, { 確定した位置: end }, settled, 'position', 5));
+          heapify(end, 0, 3);
+        }
+        return [...steps, doneStep(array, 6)];
+      }
+
+      function shellSteps(initial) {
+        const array = [...initial], steps = [];
+        for (const gap of [4, 2, 1]) {
+          steps.push(shot(array, 'phase', [], `gapを${gap}に変更`, `${gap}個離れた値を挿入ソートします。`, { gap }, [], 'range', 1));
+          for (let target = gap; target < array.length; target += 1) {
+            const value = array[target];
+            let cursor = target;
+            while (cursor >= gap) {
+              steps.push(shot(array, 'compare', [cursor - gap, cursor], 'gapだけ離れた値を比較', `${array[cursor - gap]} と ${value} を比較します。`, { gap, 比較位置: cursor - gap, 挿入対象位置: cursor }, [], 'range', 2));
+              if (array[cursor - gap] <= value) break;
+              array[cursor] = array[cursor - gap];
+              steps.push(shot(array, 'action', [cursor - gap, cursor], '値を移動', `${array[cursor]} をgap分だけ右へ移動しました。`, { gap, 移動元位置: cursor - gap, 移動先位置: cursor }, [], 'range', 3));
+              cursor -= gap;
+            }
+            array[cursor] = value;
+            steps.push(shot(array, 'action', [cursor], '挿入値を書き込む', `${value} をindex ${cursor} へ書き込みました。`, { gap, 書き込み位置: cursor }, [], 'range', 3));
+          }
+        }
+        return [...steps, doneStep(array, 5)];
       }
 
       function showScreen(name) {
+        if (name !== 'material') stopAutoPlay();
         screens.forEach(screen => {
           screen.classList.toggle('active', screen.dataset.screen === name);
         });
@@ -775,6 +1085,7 @@
         if (!material) return;
 
         saveLastOpened(materialId);
+        baseArray = createRandomPermutation();
         resetRun();
         document.getElementById('material-title').textContent = material.name;
         document.getElementById('material-field').textContent = material.field;
@@ -867,6 +1178,7 @@
         runStatus.className = 'status-badge running';
         startBtn.disabled = true;
         stepBtn.disabled = false;
+        playBtn.disabled = false;
         currentAction.innerHTML = `
           <strong>処理を開始しました</strong>
           <p>「1ステップ実行」を押して、最初の比較対象と状態変化を確認してください。</p>
@@ -883,16 +1195,17 @@
 
         state.array = [...step.result];
         state.highlight = [...step.indices];
-        state.swapped = step.swapped;
+        state.kind = step.kind;
+        state.action = step.kind === 'action';
+        state.settled = [...step.settled];
+        state.settledKind = step.settledKind;
+        state.variables = { ...step.variables };
+        state.flowIndex = step.flowIndex;
         state.stepIndex += 1;
 
-        const [a, b] = step.indices;
-        const relation = step.left > step.right ? '大きい' : '小さい、または等しい';
-        const action = step.swapped ? '左の値が大きいため、2つの位置を交換しました。' : '順序は正しいため、交換しませんでした。';
-
         currentAction.innerHTML = `
-          <strong>index ${a} と index ${b} を比較</strong>
-          <p>${step.left} と ${step.right} を比較しました。左の ${step.left} は右の ${step.right} より ${relation} ため、${action}</p>
+          <strong>${escapeHtml(step.title)}</strong>
+          <p>${escapeHtml(step.text)}</p>
         `;
 
         if (state.stepIndex >= state.steps.length) {
@@ -903,28 +1216,34 @@
       }
 
       function finishRun() {
+        stopAutoPlay();
         state.completed = true;
         state.started = true;
-        state.array = [1, 2, 3, 4, 5];
+        state.array = [...state.array].sort((left, right) => left - right);
         state.highlight = [];
-        state.swapped = false;
+        state.action = false;
+        state.settled = state.array.map((_, index) => index);
         runStatus.textContent = '完了';
         runStatus.className = 'status-badge done';
         stepBtn.disabled = true;
+        playBtn.disabled = true;
         startBtn.disabled = true;
         currentAction.innerHTML = `
-          <strong>すべての比較が完了しました</strong>
+          <strong>選択したアルゴリズムの処理が完了しました</strong>
           <p>配列は昇順に整列されました。下の解説で、なぜこの結果になるのかを確認してください。</p>
         `;
         renderRun();
       }
 
       function resetRun() {
+        stopAutoPlay();
         state = createInitialRunState();
+        initialArray.textContent = `[${baseArray.join(', ')}]`;
         runStatus.textContent = '開始前';
         runStatus.className = 'status-badge';
         startBtn.disabled = false;
         stepBtn.disabled = true;
+        playBtn.disabled = true;
         currentAction.innerHTML = `
           <strong>まだ処理は始まっていません</strong>
           <p>初期状態を確認したら「処理を開始」を押してください。</p>
@@ -935,19 +1254,23 @@
         whyBlock.textContent = '処理完了後に解説を表示します。';
         insightBlock.className = 'locked-block';
         insightBlock.textContent = '処理完了後に学習ポイントを表示します。';
+        settledLegend.textContent = algorithmPresentation[algorithmSelect.value].settled;
         renderRun();
       }
 
       function renderRun() {
-        const max = Math.max(...sortMaterial.initial);
+        const max = Math.max(...baseArray);
         bars.innerHTML = state.array.map((value, index) => {
           let statusClass = '';
           if (state.completed) statusClass = 'done';
-          else if (state.highlight.includes(index)) statusClass = state.swapped ? 'changed' : 'compare';
+          else if (state.kind === 'action' && state.highlight.includes(index)) statusClass = 'changed';
+          else if (state.kind === 'compare' && state.highlight.includes(index)) statusClass = 'compare';
+          else if (state.settled.includes(index)) statusClass = 'done';
           const height = Math.max(18, Math.round((value / max) * 82));
+          const statusText = statusClass === 'changed' ? '交換・移動・書き込み中' : statusClass === 'compare' ? '比較中' : statusClass === 'done' ? algorithmPresentation[algorithmSelect.value].settled : '通常';
           return `
             <div class="bar-column">
-              <div class="bar ${statusClass}" style="height:${height}%;" aria-label="index ${index} の値 ${value}">
+              <div class="bar ${statusClass}" style="height:${height}%;" aria-label="index ${index} の値 ${value}、${statusText}">
                 <span class="bar-value">${value}</span>
               </div>
               <div class="bar-index">index ${index}</div>
@@ -956,16 +1279,66 @@
         }).join('');
 
         arrayView.textContent = `[${state.array.join(', ')}]`;
-        stepProgress.textContent = `${state.stepIndex} / ${state.steps.length} ステップ`;
+        stepProgress.textContent = `Step ${state.stepIndex} / ${state.steps.length}`;
+        renderVariables();
+        renderFlow();
 
         if (state.completed) {
+          const copy = completionCopy[algorithmSelect.value];
           finalResult.className = 'result-block';
-          finalResult.innerHTML = `<strong class="mono">[1, 2, 3, 4, 5]</strong><br>小さい値から大きい値の順に並びました。`;
+          finalResult.innerHTML = `<strong class="mono">[1, 2, 3, 4, 5, 6, 7, 8, 9]</strong><br>小さい値から大きい値の順に並びました。`;
           whyBlock.className = 'result-block';
-          whyBlock.innerHTML = `隣り合う2つを順番に比較し、左の値が大きい場合だけ交換します。これを繰り返すことで、大きい値が右側へ移動し、最終的に全体が昇順になります。`;
+          whyBlock.textContent = copy.why;
           insightBlock.className = 'result-block';
-          insightBlock.innerHTML = `最終結果だけを見るのではなく、各比較で「交換する／しない」を判断した積み重ねが整列につながることが分かります。処理途中の状態を見ることで、アルゴリズムの規則と結果の因果関係を追えます。`;
+          insightBlock.textContent = copy.insight;
         }
+      }
+
+      function renderVariables() {
+        const entries = Object.entries(state.variables);
+        variables.innerHTML = entries.length
+          ? entries.map(([name, value]) => `<div class="variable-card"><div class="variable-name">${escapeHtml(name)}</div><div class="variable-value mono">${escapeHtml(value)}</div></div>`).join('')
+          : '<div class="locked-block">処理開始後に現在の変数を表示します。</div>';
+
+        const positions = entries.filter(([name, value]) => name.includes('位置') && Number.isInteger(value));
+        barVars.innerHTML = positions.length
+          ? positions.map(([name, value]) => `<span class="bar-var">${escapeHtml(name)} = ${escapeHtml(value)}</span>`).join('')
+          : '<span class="bar-var">このStepでバー位置を指す変数はありません。</span>';
+      }
+
+      function renderFlow() {
+        const flow = algorithmPresentation[algorithmSelect.value].flow;
+        flowList.innerHTML = flow.map(([label, type], index) => {
+          const active = index === state.flowIndex ? ' active' : '';
+          const arrow = index < flow.length - 1 ? '<div class="flow-arrow">↓</div>' : '';
+          return `<div class="flow-shape ${type}${active}">${escapeHtml(label)}</div>${arrow}`;
+        }).join('');
+      }
+
+      function stopAutoPlay() {
+        if (timer !== null) window.clearInterval(timer);
+        timer = null;
+        playBtn.textContent = '▶ 自動再生';
+      }
+
+      function toggleAutoPlay() {
+        if (timer !== null) {
+          stopAutoPlay();
+          runStatus.textContent = '一時停止';
+          return;
+        }
+        if (!state.started || state.completed) return;
+        runStatus.textContent = '実行中';
+        runStatus.className = 'status-badge running';
+        playBtn.textContent = 'Ⅱ 一時停止';
+        timer = window.setInterval(executeStep, Number(speedRange.value));
+      }
+
+      function shuffleBaseArray() {
+        stopAutoPlay();
+        const before = baseArray.join(',');
+        do baseArray = createRandomPermutation(); while (baseArray.join(',') === before);
+        resetRun();
       }
 
       function escapeHtml(value) {
@@ -992,10 +1365,20 @@
 
       startBtn.addEventListener('click', startRun);
       stepBtn.addEventListener('click', executeStep);
-      resetBtn.addEventListener('click', resetRun);
+      playBtn.addEventListener('click', toggleAutoPlay);
+      restartBtn.addEventListener('click', resetRun);
+      shuffleBtn.addEventListener('click', shuffleBaseArray);
+      algorithmSelect.addEventListener('change', resetRun);
+      speedRange.addEventListener('input', () => {
+        speedLabel.textContent = `${speedRange.value} ms`;
+        if (timer !== null) {
+          stopAutoPlay();
+          toggleAutoPlay();
+        }
+      });
 
       renderMaterialList();
-      renderRun();
+      resetRun();
       showScreen('home');
     })();
   </script>

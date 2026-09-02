@@ -6,7 +6,7 @@
 
 ## Status
 
-Ready
+Done
 
 ## Depends On
 
@@ -177,5 +177,15 @@ Storage障害：
 
 ```text
 .agents/reviews/002-learning-history-review.md
+```
+
+---
+
+## Completion Evidence
+
+```text
+Final Review: .agents/reviews/002-learning-history-review.md
+Review Decision: Next step: proceed
+Verification: npm run test / npm run build succeeded
 ```
 

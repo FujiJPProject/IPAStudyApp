@@ -12,7 +12,7 @@ describe('application routes', () => {
   it.each([
     ['/', '処理を1ステップずつ進めて'],
     ['/materials', 'ソートアルゴリズム可視化'],
-    ['/materials/sort-visualizer', '教材の実行エリア'],
+    ['/materials/sort-visualizer', '状態変化の可視化'],
     ['/history', 'まだ学習履歴はありません'],
   ])('renders the basic screen for %s', async (path, expectedText) => {
     const router = createRouter({
