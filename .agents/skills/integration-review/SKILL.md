@@ -5,6 +5,16 @@ description: Review the completed MVP as a whole against requirements.md and arc
 
 # Integration Review
 
+## When to Use
+
+Use this full-MVP review only for a release candidate, an MVP or other agreed
+milestone, or a cross-cutting change that requires a release decision.
+
+Do not run it automatically after every ordinary feature Task. The default gate
+for one completed Task is `review-feature`; run this Skill when the benefit of
+checking routes, shared architecture, persistence, responsive behavior, and
+release risks across the repository justifies the additional cost.
+
 ## Required Context
 
 Read:
