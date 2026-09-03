@@ -29,7 +29,8 @@ Read:
 5. current repository
 6. package.json
 7. package-lock.json
-8. relevant feature Reviews
+8. every Task in the MVP release scope
+9. relevant feature Reviews
 
 Read `doc/ui-reference.html` for UI and learning-flow verification.
 
