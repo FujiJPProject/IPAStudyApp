@@ -1,19 +1,22 @@
 ---
 name: integration-review
-description: Review the completed MVP as a whole against requirements.md and architecture.md without changing application code. Use after all MVP feature implementation and feature-level fixes are complete.
+description: "Review a completed MVP release candidate as a whole against requirements.md and architecture.md without changing application code. Use only after every in-scope MVP Task is Done, including after cross-cutting changes to a previously completed MVP. Do not use after every ordinary feature Task."
 ---
 
 # Integration Review
 
-## When to Use
+## Entry Gate
 
-Use this full-MVP review only for a release candidate, an MVP or other agreed
-milestone, or a cross-cutting change that requires a release decision.
+Start only when every Task in the MVP release scope is `Done`. This includes the
+initial completed MVP and a previously completed MVP after cross-cutting changes
+have passed their feature-level completion gates.
 
-Do not run it automatically after every ordinary feature Task. The default gate
-for one completed Task is `review-feature`; run this Skill when the benefit of
-checking routes, shared architecture, persistence, responsive behavior, and
-release risks across the repository justifies the additional cost.
+If any in-scope MVP Task is not `Done`, stop and report the incomplete Task
+instead of producing an Integration Review.
+
+Do not run this Skill automatically after every ordinary feature Task. The
+completion gate for one Task is `review-feature` followed by `finalize-task`,
+ending when the Task is `Done`.
 
 ## Required Context
 
