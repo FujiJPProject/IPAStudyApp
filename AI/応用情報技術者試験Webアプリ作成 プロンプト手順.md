@@ -953,12 +953,16 @@ Fixerがアプリケーションコードを変更した場合は必ずReviewer�
 
 ## 実行タイミング
 
-通常の機能追加は、対象TaskのFeature Reviewまでを完了Gateとする。
-全体統合レビューは、MVP完了、リリース候補、またはルーティング・共通設計・永続化・
-レスポンシブ表示など複数機能へ影響する変更で、リリース判断が必要なときに実行する。
+通常の機能追加は、対象TaskのFeature ReviewとFinalizeを完了し、
+Taskが`Done`になった時点を完了Gateとする。
+
+全体統合レビューは、MVP対象Taskがすべて`Done`になったリリース候補に対して実行する。
+完成済みMVPへルーティング・共通設計・永続化・レスポンシブ表示などの
+横断的変更を行った場合は、影響を受けたTaskを再び`Done`にした後で再実行する。
+MVP未完成の中間マイルストーンでは実行しない。
 
 機能Taskを1つ完了するたびに全体統合レビューを繰り返さない。
-未変更領域まで毎回再確認するコストより、機能単位のFeature Reviewを優先する。
+未変更領域まで毎回再確認するコストより、機能単位のFeature ReviewとFinalizeを優先する。
 
 統合レビューの並列上限、書き込み境界、統合方法は
 `integration-review` SkillをSource of Truthとする。
@@ -1014,8 +1018,9 @@ CodexのメインスレッドでMVP全体レビューを管理してください
 Integration Reviewが`MVP releaseable: No`かつ`Next step: fix required`で終了した場合だけ使用する。
 詳細な復帰手順は`remediate-integration-review` Skillを正本とし、ここには実行ごとに変わる入力だけを記載する。
 
-Integration Reviewには、最新の
-`.agents/reviews/integration-review-[identifier].md`を指定する。
+Integration Reviewには、リポジトリ内に保存された最新の
+`.agents/reviews/integration-review-[identifier].md`のパスを指定する。
+添付ファイルや結果全文だけを入力にしてはならない。
 この成果物には`Next step`、Finding ID、Severity、Affected Task、Required closureが
 記録されていなければならない。これらがない旧形式の成果物は入力にせず、
 先に`integration-review`を再実行して新しい成果物を作成する。
@@ -1026,18 +1031,20 @@ Integration Reviewには、最新の
 $remediate-integration-review を使用し、
 指定したIntegration ReviewのMandatory fixesを解消してください。
 
-対象TaskのFeature Review、Finalize、およびIntegration Reviewの再実行まで進めてください。
+各対象TaskのFeature Review、Finalize、およびIntegration Reviewの再実行まで進めてください。
 
 Integration Review:
-[最新の .agents/reviews/integration-review-[identifier].md のパス、添付ファイル、または結果全文]
+[最新の .agents/reviews/integration-review-[identifier].md のパス]
 
-対象Task:
-[Integration ReviewのAffected Taskに記録されたTaskパス]
+対象Task（複数可）:
+- [Integration ReviewのAffected Taskに記録されたTaskパス]
+- [別のAffected Taskがある場合は追加]
 
 push、PR作成、merge、deployは行わないでください。
 ```
 
-対象Taskは、Integration ReviewのAffected Taskと一致させる。
+対象Taskは、Integration ReviewのすべてのAffected Taskと一致させ、
+重複を除いて1行に1Taskずつ列挙する。
 たとえば、H-01がソート可視化の360px受入確認を指す場合は、
 `.agents/tasks/003-sort-visualizer.md`を指定する。
 
