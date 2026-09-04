@@ -749,7 +749,15 @@ Source of Truthを変更しない場合も、Taskの`Source of Truth Impact`へ�
 
 ## Task Gate
 
-同じ目的の既存Taskがある場合は重複作成しない。
+同じ目的の`Ready`または`Blocked` Taskがある場合は重複作成せず、
+そのTaskを更新する。
+
+同じ機能を扱うTaskが`Done`で、ユーザーが新しい追加・変更・削除を
+要求した場合は、完了済みTaskを再開・上書きしない。新しい差分だけを
+目的とする次のIDのTaskを作成し、既存の`Done` Taskを`Depends On`へ
+記録する。`Done → Ready`はIntegration ReviewのMandatory fix対応だけに
+使用する。
+
 新しいTaskは原則として`Blocked`から開始する。
 
 Taskを`Ready`にできるのは、次をすべて満たす場合だけとする。
@@ -885,7 +893,9 @@ Skill:
 
 前回の質問への確定回答だけを反映してください。
 必要なSource of Truthを先に更新し、
-その後、既存Taskを更新または新規Taskを作成してください。
+その後、ReadyまたはBlockedの既存Taskは更新し、
+Done Taskへの新しい変更要求は完了済みTaskを上書きせず
+差分専用の新規Taskとして作成してください。
 TaskがReadyまたはBlockedになった時点で停止し、
 アプリケーションコードは変更しないでください。
 
@@ -937,7 +947,8 @@ Fixerの実行後は、アプリケーションコードを変更しなかった
 - [ ] 確定前にSource of TruthやTaskを変更していない
 - [ ] 必要なSource of Truthだけを更新した
 - [ ] 対応するTaskを新規作成または更新した
-- [ ] 既存Taskを重複作成していない
+- [ ] ReadyまたはBlockedの既存Taskを重複作成していない
+- [ ] Done Taskへの通常変更は差分専用の新規Taskとして作成した
 - [ ] TaskのStatusがGateに従っている
 - [ ] TaskがReadyになるまで実装していない
 - [ ] 各工程で対応するRole、Skill、Taskを指定した
@@ -1052,9 +1063,10 @@ Integration Reviewが`MVP releaseable: No`かつ`Next step: fix required`で終�
 Integration Reviewには、リポジトリ内に保存された最新の
 `.agents/reviews/integration-review-[identifier].md`のパスを指定する。
 添付ファイルや結果全文だけを入力にしてはならない。
-この成果物には`MVP release scope`、`Reviewed revision`、`Next step`、
-Finding ID、Severity、Affected Taskのリポジトリパス、Required closureが
-記録されていなければならない。これらがない旧形式の成果物は入力にせず、
+この成果物には`MVP release scope`、`Reviewed revision`、`Next step`と、
+`Mandatory fixes before release`配下の各項目としてFinding ID、Severity、
+Affected Taskのリポジトリパス、Required closureが記録されていなければ
+ならない。これらがない旧形式の成果物は入力にせず、
 先に`integration-review`を再実行して新しい成果物を作成する。
 
 ```text
@@ -1067,14 +1079,15 @@ Integration Review:
 [最新の .agents/reviews/integration-review-[identifier].md のパス]
 
 対象Task（複数可）:
-- [Integration ReviewのAffected Taskに記録されたTaskパス]
-- [別のAffected Taskがある場合は追加]
+- [Mandatory fixのAffected Taskに記録されたTaskパス]
+- [別のMandatory fixに対応するTaskがある場合は追加]
 
 push、PR作成、merge、deployは行わないでください。
 ```
 
-対象Taskは、Integration ReviewのすべてのAffected Taskと一致させ、
-重複を除いて1行に1Taskずつ列挙する。
+対象Taskは、Integration ReviewのすべてのMandatory fixesに記録された
+Affected Taskの集合と完全に一致させ、重複を除いて1行に1Taskずつ列挙する。
+不足TaskをAIに推測させない。
 たとえば、H-01がソート可視化の360px受入確認を指す場合は、
 `.agents/tasks/003-sort-visualizer.md`を指定する。
 

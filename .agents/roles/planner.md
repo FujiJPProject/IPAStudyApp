@@ -22,7 +22,8 @@ Taskの新規作成または更新を担当する。
 - ユーザー確認前のSource of Truth変更
 - アプリケーションコード変更
 - 機能実装、正式なコードレビュー、レビュー指摘修正
-- 既存Taskと同じ目的のTaskを重複作成すること
+- `Ready`または`Blocked`の既存Taskと同じ目的のTaskを重複作成すること
+- 通常の機能変更で`Done` Taskを再開または上書きすること
 - 重要なOpen Decisionsが残るTaskをReadyにすること
 - 依存TaskがDoneでないTaskをReadyにすること
 

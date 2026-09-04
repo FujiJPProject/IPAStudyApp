@@ -41,7 +41,8 @@ Extract every Mandatory fix and verify that each includes:
 Require the supplied Task list to match the complete, deduplicated set of
 Affected Tasks from all Mandatory fixes. Do not silently omit or add a Task.
 
-If an Affected Task is not supplied, identify it only when the Review and Task evidence make the mapping unambiguous.
+If the Task list is missing or does not match, stop and request the corrected
+complete list. Do not infer a missing Task from repository history.
 
 ## Stop and Ask the User
 
@@ -56,6 +57,22 @@ Do not begin a Task reopen or code change. Consolidate the questions and stop wh
 
 Medium, Low, and deferrable improvements are not part of this remediation unless they are necessary to satisfy a listed Required closure.
 
+## Remediation Baseline
+
+Before the first write, record in the parent session:
+
+- the supplied Integration Review path
+- its `Reviewed revision`
+- the complete affected Task list
+- the dependency order
+- an initially empty list of Tasks finalized in this remediation session
+
+The Integration Review must cover the application implementation at this starting
+point. For later Tasks, the current implementation may differ from the baseline
+only through verified changes for earlier affected Tasks finalized in this same
+session. Any unrelated application change makes the baseline invalid and requires
+a new Integration Review.
+
 ## Task Order
 
 Build a dependency order for the affected Tasks before any write.
@@ -63,21 +80,41 @@ Build a dependency order for the affected Tasks before any write.
 - If Task A depends on Task B and both are affected, fully remediate and finalize B before reopening A.
 - Do not reopen a Task until every dependency is `Done` and no dependency is awaiting remediation.
 - Process Task writes one at a time in that dependency order.
+- Keep affected Tasks that have not reached their turn in the session's pending
+  set. Their physical Status may remain `Done`, but do not treat them as release-complete.
 
 ## Procedure
 
 For each affected Task in dependency order:
 
-1. Delegate `reopen-task` to the Finalizer with the Task and Integration Review.
-2. Delegate `fix-review` to the Fixer with only that Task's Mandatory findings.
-3. Require `npm run test` and `npm run build`.
+1. Delegate `reopen-task` to the Finalizer with the Task, Integration Review, and
+   current remediation-session evidence.
+2. Start Fixer-to-Reviewer cycle 1. Delegate `fix-review` to the Fixer with only
+   that Task's structured Mandatory fixes from the Integration Review.
+3. Require `npm run test` and `npm run build` to finish successfully.
 4. Delegate `review-feature` to the Reviewer for the current implementation.
-5. If the Feature Review concludes exactly `Next step: fix Critical / High`, return to step 2. Allow at most two Fixer-to-Reviewer cycles for the Task.
-6. If Critical / High remains after the second cycle, or the Feature Review produces an unexpected decision, stop and report the remaining evidence and required user decision.
-7. Delegate `finalize-task` to the Finalizer only after the Feature Review concludes exactly `Next step: proceed`. The Task must be `Done` again with new Completion Evidence before continuing.
-8. After every affected Task is finalized, delegate `integration-review` to the Release Auditor using the same `MVP release scope` recorded by the supplied Review, and create a new, non-overwriting Integration Review artifact.
-9. If the new review is `MVP releaseable: No` and `Next step: fix required`, repeat this Skill from the Start Gate using that new artifact.
-10. If the new review is `Next step: user decision required`, stop and present the consolidated decision request.
+5. If the cycle 1 Feature Review concludes exactly `Next step: proceed`, skip to
+   step 8.
+6. If the cycle 1 Feature Review concludes exactly `Next step: fix Critical /
+   High`, start cycle 2 by delegating `fix-review` with the latest Feature Review's
+   Critical / High findings. Continue to verify the original Mandatory fixes and
+   Required closures, but do not reuse them as the sole Fix input. Run `npm run
+   test` and `npm run build`, then delegate a new `review-feature` pass.
+7. If the cycle 2 Feature Review does not conclude exactly `Next step: proceed`,
+   or either Feature Review produces an unexpected decision, stop and report the
+   remaining evidence and required user decision.
+8. Delegate `finalize-task` to the Finalizer only after the latest Feature Review
+   concludes exactly `Next step: proceed`. The Task must be `Done` again with new
+   Completion Evidence before continuing. Add it to the session's finalized Task
+   list.
+9. After every affected Task is finalized, delegate `integration-review` to the
+   Release Auditor using the same `MVP release scope` recorded by the supplied
+   Review, and create a new, non-overwriting Integration Review artifact.
+10. If the new review is `MVP releaseable: No` and `Next step: fix required`,
+    repeat this Skill from the Start Gate using that new artifact and a new
+    remediation baseline.
+11. If the new review is `Next step: user decision required`, stop and present the
+    consolidated decision request.
 
 The parent Orchestrator manages the state transitions but does not edit Tasks, Review artifacts, Source of Truth, or application code itself.
 

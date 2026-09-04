@@ -190,17 +190,32 @@ Use this output contract:
 - `Reviewed revision` containing an unambiguous identifier of the reviewed repository state
 - `MVP releaseable: Yes / No`
 - `Next step: proceed / fix required / user decision required`
-- Blocking findings
+- `Blocking findings`
   - Finding ID
   - Severity
+  - Affected Task repository path, or `user decision required` when no safe Task mapping exists
+  - Closure type: `mandatory fix` or `user decision`
+  - Required closure or required decision
+- `Mandatory fixes before release`
+  - Finding ID
+  - Severity: Critical or High
   - Affected Task repository path
   - Required closure
-- Mandatory fixes before release
-- Deferrable improvements
+- `Deferrable improvements`
+  - Finding ID
+  - Severity: Medium or Low
+  - Affected Task repository path when applicable
+  - Recommended follow-up
+
+Treat `Mandatory fixes before release` as the single Source of Truth for
+remediation input. Every `mandatory fix` entry under `Blocking findings` must have
+one matching Mandatory fix with identical ID, Severity, Affected Task, and
+Required closure. A `user decision` blocker is not a Mandatory fix. Write `None`
+for both fields when there is no release-blocking finding.
 
 When `MVP releaseable: Yes`, conclude with exactly `Next step: proceed`.
 
-When `MVP releaseable: No` and the correction does not require a user specification decision or Task split, conclude with exactly `Next step: fix required`. Every Mandatory fix must be classified as Critical or High and include an Affected Task repository path and Required closure.
+When `MVP releaseable: No` and the correction does not require a user specification decision or Task split, conclude with exactly `Next step: fix required`. Include at least one structured Mandatory fix. Every Mandatory fix must be classified as Critical or High and include an Affected Task repository path and Required closure.
 
 When a requirement change, acceptance-criteria change, Task split, or another important product decision is necessary, conclude with exactly `Next step: user decision required`. Do not infer the decision.
 

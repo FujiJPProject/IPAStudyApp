@@ -30,7 +30,9 @@ Inspect the request and repository before choosing the first phase.
   - current Review says `fix Critical / High`: start with Fixer
   - current Review says `proceed`: start with Finalizer
 - `Blocked` Task: report its Unblock Condition and use Planner only when resolving it requires analysis or user decisions.
-- `Done` Task: stop unless the user explicitly requests a new change.
+- `Done` Task: stop unless the user explicitly requests a new change. For an
+  explicit new change, start Planner analysis and create a new delta Task; do not
+  reopen or overwrite the completed Task in this feature cycle.
 
 Do not trust a subagent summary alone. Re-read the Task, Review artifact,
 and relevant current diff after every handoff.

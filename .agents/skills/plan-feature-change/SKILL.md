@@ -73,12 +73,22 @@ After all required answers are confirmed:
 2. Update `doc/ui-reference.html` when confirmed UI or UX changes.
 3. Update `doc/architecture.md` when the implementation design changes.
 4. Re-check the three Source of Truth files for contradictions.
-5. Search existing Tasks for the same objective.
-6. Update the existing Task when one already exists; otherwise create the next Task from `TEMPLATE.md`.
-7. Record the change type, documentation impact, Candidate References, confirmed decisions, scope, out of scope, allowed changes, dependencies, and acceptance criteria.
-8. Set the Task status using the status gate below.
+5. Search existing Tasks for the same objective and inspect their Status.
+6. Select the Task path without rewriting completed history:
+   - update the matching Task only when it is `Ready` or `Blocked`
+   - when the matching Task is `Done` and the user requested a new change, leave it
+     unchanged and create the next uniquely identified Task for only the new delta
+   - when no matching Task exists, create the next Task from `TEMPLATE.md`
+7. For a new delta Task that changes completed work, record the affected `Done` Task
+   under `Depends On` and make the new objective and acceptance criteria distinct
+   from the completed Task.
+8. Record the change type, documentation impact, Candidate References, confirmed decisions, scope, out of scope, allowed changes, dependencies, and acceptance criteria.
+9. Set the selected Task status using the status gate below.
 
 Do not modify application code in this Skill.
+Do not reopen, overwrite, or clear Completion Evidence from a `Done` Task for an
+ordinary feature change. `Done → Ready` is reserved for the Integration Review
+remediation flow defined by `reopen-task`.
 Apply confirmed decisions with exactly one Planner writer.
 
 ## Task Status Gate

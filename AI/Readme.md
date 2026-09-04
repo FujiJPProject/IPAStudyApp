@@ -66,7 +66,7 @@ flowchart TD
 - **orchestrate-feature-cycle**
   - プロンプト手順のPhase 5で、CodexによるPlanからFinalizeまでの状態遷移、Gate、停止・再開を管理する
 - **plan-feature-change**
-  - 実装前の差分・影響分析、質問、確定内容の反映、Task準備を行う
+  - 実装前の差分・影響分析、質問、確定内容の反映、Task準備を行う。Done Taskへの通常変更は差分専用の新しいTaskにする
 - **implement-feature**
   - `Ready` TaskのBuildを行う
 - **review-feature**
@@ -80,7 +80,7 @@ flowchart TD
 - **integration-review**
   - プロンプト手順のPhase 6でMVP全体を横断して確認する
 - **remediate-integration-review**
-  - Phase 6のNG後にMandatory fix、Feature Review、Finalize、統合レビュー再実行を管理する
+  - Phase 6のNG後に、remediation baselineを維持しながらMandatory fix、Feature Review、Finalize、統合レビュー再実行を管理する
 - **deploy-readiness**
   - プロンプト手順のPhase 7でCloudflare Pagesへのデプロイ可否を確認する
 

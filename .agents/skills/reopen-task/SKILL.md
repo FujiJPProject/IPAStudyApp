@@ -14,7 +14,9 @@ Read completely:
 3. the specified Done Task
 4. the specified Integration Review
 5. the Task's latest formal Review
-6. relevant current code and tests when needed to verify the evidence is current
+6. the parent remediation-session evidence, including the baseline revision and
+   earlier Tasks finalized in the same session
+7. relevant current code and tests when needed to verify the evidence is current
 
 ## Preconditions
 
@@ -24,7 +26,13 @@ Require all of the following:
 - the Integration Review concludes `MVP releaseable: No`
 - the Integration Review concludes exactly `Next step: fix required`
 - the Integration Review records its `MVP release scope` and `Reviewed revision`
-- the recorded revision covers the current application implementation
+- the recorded revision covered the application implementation when the current
+  remediation session began
+- the current application implementation either matches that baseline or differs
+  only through verified changes for earlier affected Tasks finalized in the same
+  remediation session
+- every dependency Task is `Done` and no affected dependency is awaiting remediation
+- there is no unrelated application change after the baseline Review
 - at least one Mandatory fix is classified Critical or High
 - every Mandatory fix to be handled is explicitly mapped to the specified Task repository path
 - each mapped finding has a concrete Required closure
@@ -38,8 +46,13 @@ If the finding requires a requirement change, acceptance-criteria change, Task s
 
 1. Read the specified Task, its Completion Evidence, and Reopen History.
 2. Read the complete Integration Review and extract only the Mandatory fixes mapped to the specified Task.
-3. Verify the Preconditions without modifying files.
-4. Append one Reopen History entry containing the Integration Review path, Blocking Finding IDs, Required closure summary, previous Final Review path, and reason: `MVP releaseable: No`.
+3. Compare the current implementation with the baseline revision and verify that
+   every difference is covered by an earlier Task in the session's finalized Task
+   list. Verify the remaining Preconditions without modifying files.
+4. Append one Reopen History entry containing the Integration Review path,
+   baseline Reviewed revision, earlier finalized remediation Tasks, Blocking
+   Finding IDs, Required closure summary, previous Final Review path, and reason:
+   `MVP releaseable: No`.
 5. Change only the specified Task:
    - `Status: Done` to `Status: Ready`
    - `Completion Evidence` to `未完了。`
@@ -53,7 +66,9 @@ Do not:
 - modify application code, tests, Source of Truth, or Review artifacts
 - change Task scope, decisions, acceptance criteria, or dependencies
 - reopen a Task from a Release Auditor summary alone
-- reopen a Task when the Integration Review is stale or missing its output contract
+- reopen a Task when the baseline Review is missing its output contract, was stale
+  at session start, or current changes include anything outside earlier verified
+  remediation Tasks
 - reopen multiple Tasks in one write operation
 
 ## Output
