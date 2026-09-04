@@ -228,6 +228,12 @@ tests/**
 
 ---
 
+## Reopen History
+
+なし。
+
+---
+
 ## Completion Evidence
 
 ```text

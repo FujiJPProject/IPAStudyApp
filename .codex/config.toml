@@ -2,3 +2,5 @@
 enabled = true
 max_concurrent_threads_per_session = 3
 
+[features]
+goals = true

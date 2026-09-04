@@ -173,11 +173,9 @@ Storage障害：
 
 ---
 
-## Review Output
+## Reopen History
 
-```text
-.agents/reviews/002-learning-history-review.md
-```
+なし。
 
 ---
 
@@ -189,3 +187,10 @@ Review Decision: Next step: proceed
 Verification: npm run test / npm run build succeeded
 ```
 
+---
+
+## Review Output
+
+```text
+.agents/reviews/002-learning-history-review.md
+```

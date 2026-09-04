@@ -25,14 +25,13 @@ graph TD
     A["① 要件定義"] --> B["② UIプロトタイプ作成"]
     B --> C["③ アーキテクチャ設計"]
     C --> D["④ アプリ基盤作成"]
-    D --> E["⑤ 機能実装"]
-    E --> F["⑥ コードレビュー"]
-    F --> G["⑦ レビュー指摘修正"]
-    G --> H["⑧ 機能追加サイクル"]
-    H --> I["⑨ 全体統合レビュー"]
-    I -->|"releaseable"| J["⑩ Cloudflare Pagesデプロイ準備・可否確認"]
-    I -->|"fix required"| K["Phase 9 NG対応"]
+    D --> E["⑤ 機能追加サイクル"]
+    E --> I["⑥ 全体統合レビュー"]
+    I -->|"MVP releaseable: Yes"| J["⑦ Cloudflare Pagesデプロイ準備・可否確認"]
+    I -->|"fix required"| K["統合レビューNG対応"]
     K -->|"Integration Review再実行"| I
+    I -->|"user decision required"| L["ユーザー判断で停止"]
+    L -->|"判断確定後"| E
 ```
 
 ### 制約
@@ -214,7 +213,7 @@ Task:
 
 上記は単独工程を手動実行する場合の基本形である。
 
-本手順のPhase 8では、Codexのメインスレッドを親Orchestratorとし、
+本手順のPhase 5では、Codexのメインスレッドを親Orchestratorとし、
 Goal modeと`orchestrate-feature-cycle` Skillで1つの機能サイクルを管理する。
 
 状態遷移、並列実行、停止・再開条件、完了GateはSkillを正本とする。
@@ -275,26 +274,19 @@ npm run preview
 
 # 5. データ保存方針
 
-MVPでは可能であれば以下を利用する。
-
-- localStorage
-- IndexedDB
-
-ただしUIから直接localStorage等を操作しない。
+MVPの永続化には`localStorage`だけを利用する。
+Vueコンポーネントから直接操作せず、学習履歴専用の
+`historyService`を通す。
 
 ```mermaid
 flowchart LR
-    UI --> ServiceRepository["Service / Repository"]
-    ServiceRepository --> Storage["Storage"]
+    UI --> HistoryService["historyService"]
+    HistoryService --> Storage["localStorage"]
 ```
 
-将来的に以下のような置き換えができる構造とする。
-
-```mermaid
-flowchart LR
-    UI --> ServiceRepository["Service / Repository"]
-    ServiceRepository --> Supabase["Supabase等のDB"]
-```
+MVPではIndexedDB、Repository層、API Client、バックエンド、DBを導入しない。
+将来DBが必要になった場合は、要件を確定して`doc/requirements.md`と
+`doc/architecture.md`を更新した後に構成を再検討する。
 
 ---
 
@@ -556,8 +548,10 @@ ChatGPT Plus
 ## プロンプト例
 
 ```md
-添付されている要件定義とHTMLは、
-これから実装するWebアプリの仕様です。
+添付するdoc/requirements.mdとdoc/ui-reference.htmlを、
+それぞれ機能要件とUI表現のSource of Truthとして使用してください。
+これら以外のHTML、モック、メモはCandidate Referenceであり、
+相違点をユーザーが採用すると確定するまで仕様にしないでください。
 
 HTMLをそのまま本番コードとして利用するのではなく、
 Vue 3 + TypeScript + Viteで実装するための
@@ -668,9 +662,27 @@ Task外の実装や設計変更は行わないでください。
 完了後はAGENTS.mdで指定された形式だけ報告してください。
 ```
 
+Builderの報告だけではTask 001を完了とみなさない。
+実装後は、同じTaskに対して次を順番に実行する。
+
+```text
+Reviewer + review-feature
+→ Critical / Highがある場合はFixer + fix-review
+→ Fix後はコード変更の有無にかかわらずReviewerで再レビュー
+→ Next step: proceedの場合だけFinalizer + finalize-task
+→ Task 001がDoneでCompletion Evidenceを持つことを確認
+```
+
+ChatGPT Workでは、最初のBuildには上記の`foundation` Skillを使用する。
+その後はPhase 5の「Build以降」にある1工程用テンプレートを使用し、
+Review、必要なFixとRe-review、Finalizeを別工程として実行する。
+基盤作成のBuildを`implement-feature`へ置き換えない。
+CodexでTask 001を最初から管理する場合は、既存のReady Taskと
+実装Skillとして`foundation`を指定し、`orchestrate-feature-cycle`に従う。
+
 ---
 
-# 12. Phase 8：機能追加を繰り返す
+# 12. Phase 5：機能追加を繰り返す
 
 ## 目的
 
@@ -737,7 +749,15 @@ Source of Truthを変更しない場合も、Taskの`Source of Truth Impact`へ�
 
 ## Task Gate
 
-同じ目的の既存Taskがある場合は重複作成しない。
+同じ目的の`Ready`または`Blocked` Taskがある場合は重複作成せず、
+そのTaskを更新する。
+
+同じ機能を扱うTaskが`Done`で、ユーザーが新しい追加・変更・削除を
+要求した場合は、完了済みTaskを再開・上書きしない。新しい差分だけを
+目的とする次のIDのTaskを作成し、既存の`Done` Taskを`Depends On`へ
+記録する。`Done → Ready`はIntegration ReviewのMandatory fix対応だけに
+使用する。
+
 新しいTaskは原則として`Blocked`から開始する。
 
 Taskを`Ready`にできるのは、次をすべて満たす場合だけとする。
@@ -755,12 +775,10 @@ Taskを`Done`にできるのは、`finalize-task` Skillの完了Gateを
 
 1機能を計画から完了確定まで進める場合は、次を1回送る。
 
-プロンプトを投げる前に、変更要求の内容自体をAIに考えてもらう。
+変更要求が曖昧な場合は、通常のチャットで内容を整理してからGoalを開始する。
 
 ```text
-/goal
-
-$orchestrate-feature-cycle を使用し、
+/goal $orchestrate-feature-cycle を使用し、
 次の機能変更を計画GateからTask完了確定まで進めてください。
 
 変更要求:
@@ -875,7 +893,9 @@ Skill:
 
 前回の質問への確定回答だけを反映してください。
 必要なSource of Truthを先に更新し、
-その後、既存Taskを更新または新規Taskを作成してください。
+その後、ReadyまたはBlockedの既存Taskは更新し、
+Done Taskへの新しい変更要求は完了済みTaskを上書きせず
+差分専用の新規Taskとして作成してください。
 TaskがReadyまたはBlockedになった時点で停止し、
 アプリケーションコードは変更しないでください。
 
@@ -915,7 +935,8 @@ Review:
 次工程は実行せず、Skillが定義する成果物と検証結果を報告してください。
 ```
 
-Fixerがアプリケーションコードを変更した場合は必ずReviewerへ戻る。
+Fixerの実行後は、アプリケーションコードを変更しなかった場合も必ずReviewerへ戻る。
+前のReviewが`fix Critical / High`のままではFinalizeしない。
 最終Reviewが`Next step: proceed`になった後、
 `finalizer` Roleと`finalize-task` Skillを別工程として実行する。
 
@@ -926,14 +947,13 @@ Fixerがアプリケーションコードを変更した場合は必ずReviewer�
 - [ ] 確定前にSource of TruthやTaskを変更していない
 - [ ] 必要なSource of Truthだけを更新した
 - [ ] 対応するTaskを新規作成または更新した
-- [ ] 既存Taskを重複作成していない
+- [ ] ReadyまたはBlockedの既存Taskを重複作成していない
+- [ ] Done Taskへの通常変更は差分専用の新規Taskとして作成した
 - [ ] TaskのStatusがGateに従っている
 - [ ] TaskがReadyになるまで実装していない
-- [ ] Codexでは`orchestrate-feature-cycle` Skillを使用した
-- [ ] 各工程を対応するCustom Agentへ委譲した
-- [ ] 並列実行はSkillが許可する読み取り専用調査だけである
-- [ ] 書き込み可能なRoleを同時実行していない
-- [ ] Fixerがコードを変更した場合にReviewerを再実行した
+- [ ] 各工程で対応するRole、Skill、Taskを指定した
+- [ ] 書き込み工程を1つずつ順番に実行した
+- [ ] Fix後にコード変更の有無を問わずReviewerを再実行した
 - [ ] 最新Reviewが現在の実装を対象としている
 - [ ] 最新Reviewが`Next step: proceed`で終了している
 - [ ] `npm run test`が成功した
@@ -945,11 +965,36 @@ Fixerがアプリケーションコードを変更した場合は必ずReviewer�
 
 ---
 
-# 13. Phase 9：全体統合レビュー
+# 13. Phase 6：全体統合レビュー
 
 ## 目的
 
 すべてのMVP機能が完成した段階で、アプリ全体が要件・設計に沿って統合され、リリース可能な状態か確認する。
+
+## 実行タイミング
+
+通常の機能追加は、対象TaskのFeature ReviewとFinalizeを完了し、
+Taskが`Done`になった時点を完了Gateとする。
+
+全体統合レビューは、MVP対象Taskがすべて`Done`になったリリース候補に対して実行する。
+完成済みMVPへルーティング・共通設計・永続化・レスポンシブ表示などの
+横断的変更を行った場合は、影響を受けたTaskを再び`Done`にした後で再実行する。
+MVP未完成の中間マイルストーンでは実行しない。
+
+レビュー対象はプロンプトの`MVP release scope`でTaskパスを明示する。
+`.agents/tasks/`配下の全Taskを暗黙に対象としてはならない。
+現在のMVPでは次の3 Taskを指定する。
+
+```text
+.agents/tasks/001-foundation.md
+.agents/tasks/002-learning-history.md
+.agents/tasks/003-sort-visualizer.md
+```
+
+MVP範囲を変更した場合は、`doc/requirements.md`と一致するようこの一覧を更新する。
+
+機能Taskを1つ完了するたびに全体統合レビューを繰り返さない。
+未変更領域まで毎回再確認するコストより、機能単位のFeature ReviewとFinalizeを優先する。
 
 統合レビューの並列上限、書き込み境界、統合方法は
 `integration-review` SkillをSource of Truthとする。
@@ -979,7 +1024,12 @@ Role:
 Skill:
 .agents/skills/integration-review/SKILL.md
 
-requirements.md、architecture.md、ui-reference.htmlを基準として、
+MVP release scope:
+- .agents/tasks/001-foundation.md
+- .agents/tasks/002-learning-history.md
+- .agents/tasks/003-sort-visualizer.md
+
+doc/requirements.md、doc/architecture.md、doc/ui-reference.htmlを基準として、
 現在のMVP全体をレビューしてください。
 アプリケーションコードは変更しないでください。
 ```
@@ -989,6 +1039,11 @@ requirements.md、architecture.md、ui-reference.htmlを基準として、
 ```text
 $integration-review を使用し、
 CodexのメインスレッドでMVP全体レビューを管理してください。
+
+MVP release scope:
+- .agents/tasks/001-foundation.md
+- .agents/tasks/002-learning-history.md
+- .agents/tasks/003-sort-visualizer.md
 
 必要な場合だけ、カスタムエージェントworkflow_analystによる
 独立した読み取り専用調査をSkillの上限内で実行してください。
@@ -1005,27 +1060,43 @@ CodexのメインスレッドでMVP全体レビューを管理してください
 Integration Reviewが`MVP releaseable: No`かつ`Next step: fix required`で終了した場合だけ使用する。
 詳細な復帰手順は`remediate-integration-review` Skillを正本とし、ここには実行ごとに変わる入力だけを記載する。
 
-```
-/goal
+Integration Reviewには、リポジトリ内に保存された最新の
+`.agents/reviews/integration-review-[identifier].md`のパスを指定する。
+添付ファイルや結果全文だけを入力にしてはならない。
+この成果物には`MVP release scope`、`Reviewed revision`、`Next step`と、
+`Mandatory fixes before release`配下の各項目としてFinding ID、Severity、
+Affected Taskのリポジトリパス、Required closureが記録されていなければ
+ならない。これらがない旧形式の成果物は入力にせず、
+先に`integration-review`を再実行して新しい成果物を作成する。
 
-$remediate-integration-review を使用し、
-Phase 9のNG対応からIntegration Reviewの再通過まで進めてください。
+```text
+/goal $remediate-integration-review を使用し、
+指定したIntegration ReviewのMandatory fixesを解消してください。
+
+各対象TaskのFeature Review、Finalize、およびIntegration Reviewの再実行まで進めてください。
 
 Integration Review:
-[最新のIntegration Review成果物パス、添付ファイル、または結果全文]
+[最新の .agents/reviews/integration-review-[identifier].md のパス]
 
-対象Task:
-[Taskパス。Reviewから安全に特定できる場合は「Reviewから特定」]
+対象Task（複数可）:
+- [Mandatory fixのAffected Taskに記録されたTaskパス]
+- [別のMandatory fixに対応するTaskがある場合は追加]
 
 push、PR作成、merge、deployは行わないでください。
 ```
+
+対象Taskは、Integration ReviewのすべてのMandatory fixesに記録された
+Affected Taskの集合と完全に一致させ、重複を除いて1行に1Taskずつ列挙する。
+不足TaskをAIに推測させない。
+たとえば、H-01がソート可視化の360px受入確認を指す場合は、
+`.agents/tasks/003-sort-visualizer.md`を指定する。
 
 `Next step: user decision required`の場合は、このプロンプトを実行せず、
 Integration Reviewが示した判断を先に確定する。
 
 ---
 
-# 14. Phase 10：Cloudflare Pagesデプロイ準備・可否確認
+# 14. Phase 7：Cloudflare Pagesデプロイ準備・可否確認
 
 ## 目的
 
@@ -1069,6 +1140,9 @@ Role:
 Skill:
 .agents/skills/deploy-readiness/SKILL.md
 
+Integration Review:
+[現在の実装を対象とし、MVP releaseable: Yes / Next step: proceedで終了した最新成果物パス]
+
 Cloudflare Pagesへデプロイ可能な状態か確認してください。
 実際のデプロイ、GitHubへのpush、Cloudflare側設定変更は行わないでください。
 ```
@@ -1079,6 +1153,9 @@ Cloudflare Pagesへデプロイ可能な状態か確認してください。
 $deploy-readiness を使用し、
 1つのカスタムエージェントrelease_auditorへ
 Cloudflare Pagesのデプロイ可否確認を委譲してください。
+
+Integration Review:
+[現在の実装を対象とし、MVP releaseable: Yes / Next step: proceedで終了した最新成果物パス]
 
 実際のpush、PR作成、Cloudflare側設定変更、deployは
 行わないでください。
@@ -1092,6 +1169,15 @@ ChatGPT Workで期待する結果が得られなかった場合、最初から�
 
 失敗原因に応じて修正プロンプトを使い、Workでの修正を優先する。複数回の修正でも原因特定や解決が難しい場合のみCodexへ切り替える。
 
+修正時も現在のTaskと状態遷移を維持する。
+
+- 正式Review前のBuilder作業なら、同じRole、Skill、Taskを再掲して修正後にReviewへ進む
+- 正式Review後なら、Review成果物を入力に`fix-review`を実行し、必ずRe-reviewへ戻る
+- Task範囲、Source of Truth、受入条件の変更が必要なら、コードを変更せずPlannerへ戻る
+- Task外の既存変更やユーザーの変更を取り消さない
+
+以下のプロンプトには、現在のRole、Skill、Task、および必要なReviewパスを追加して使用する。
+
 ---
 
 ## ケース1：変更範囲が広すぎる
@@ -1099,7 +1185,7 @@ ChatGPT Workで期待する結果が得られなかった場合、最初から�
 ```text
 今回の変更範囲が要求より広くなっています。
 
-既存機能への不要な変更を取り消し、
+今回のTaskで追加した不要な変更だけを取り消し、
 以下だけを変更してください。
 
 # 変更対象
@@ -1156,13 +1242,15 @@ architecture.md自体は変更しないでください。
 
 ---
 
-## ケース4：UIがHTMLと違う
+## ケース4：UIがUI参照と違う
 
 ```text
 機能自体は変更せず、
-UIを添付HTMLに近づけてください。
+UIをdoc/ui-reference.htmlに合わせてください。
 
-添付HTMLはUI仕様として扱ってください。
+添付HTMLがdoc/ui-reference.html以外の場合はCandidate Referenceとして扱い、
+相違点を示してください。自動的に仕様として採用しないでください。
+採用判断が必要な場合はコードを変更せず、Plannerへ戻してください。
 
 # 今回変更してよいもの
 
@@ -1401,6 +1489,10 @@ ChatGPT Work（手動Phase実行）
 またはCodex親Orchestrator
      │
      ├─ アプリ基盤
+     │    ├─ Task 001のReady確認
+     │    ├─ Foundation実装
+     │    ├─ レビュー・必要なら修正と再レビュー
+     │    └─ FinalizerによるDone確定
      │
      ├─ 機能A
      │    ├─ 親が計画・質問・Source of Truth更新を管理
@@ -1432,25 +1524,30 @@ ChatGPT Work（手動Phase実行）
      ├─ MVP releaseable: Yes / Next step: proceed
      │   │
      │   ▼
-     │  npm run build
-     │   │
-     │   ▼
-     │  GitHub
-     │   │
-     │   ▼
-     │  Cloudflare Pages
      │  デプロイ可否確認
+     │  （clean install・test・build・preview・routing）
      │   │
      │   ▼
-     │  手順完了
+     │  Deployable: Yes
+     │   │
+     │   ▼
+     │  GitHub / Cloudflare Pagesへの引き渡し準備完了
+     │  （push・設定変更・deployは本手順の対象外）
      │
-     └─ MVP releaseable: No / Next step: fix required
+     ├─ MVP releaseable: No / Next step: fix required
          │
          ▼
         Integration Review remediation
         （Task再開 → Fix → Feature Review → Finalize）
          │
          └──── 統合レビューへ戻る
+
+     └─ MVP releaseable: No / Next step: user decision required
+         │
+         ▼
+        ユーザー判断で停止
+         │
+         └──── 判断確定後、機能追加サイクルへ戻る
 ```
 
 ---
@@ -1485,7 +1582,7 @@ Finalizerによる完了確定
 
 という工程を守ることを優先する。
 
-Phase 8では、CodexのGoal modeで`orchestrate-feature-cycle` Skillを使用し、
+Phase 5では、CodexのGoal modeで`orchestrate-feature-cycle` Skillを使用し、
 親Orchestratorが各Roleを状態遷移に従って委譲する。
 選択したSkillのGateを満たした場合だけ次へ進む。
 

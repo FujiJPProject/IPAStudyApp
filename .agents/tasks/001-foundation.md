@@ -151,9 +151,24 @@ tests/**
 
 ---
 
+## Reopen History
+
+なし。
+
+---
+
+## Completion Evidence
+
+```text
+Final Review: .agents/reviews/001-foundation-review.md
+Review Decision: Next step: proceed
+Verification: npm run test / npm run build succeeded
+```
+
+---
+
 ## Review Output
 
 ```text
 .agents/reviews/001-foundation-review.md
 ```
-

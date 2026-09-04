@@ -95,17 +95,20 @@ tasks/<task>.md または Candidate Reference
 ```
 
 Plannerは確定前のSource of TruthやTaskを変更しない。
+通常変更で既存の`Done` Taskへ追加・変更・削除を行う場合、Plannerは
+完了済みTaskを上書きせず、差分専用の新しいTaskを作成する。
 Builderは`Ready` Taskだけを実装する。
 Reviewerは正式Review成果物だけを書き込む。
-Fixerがコードを変更した場合はReviewerへ戻る。
+Fixerの実行後はコード変更の有無にかかわらずReviewerへ戻る。
 Finalizerだけが完了Gate確認後にTaskを`Done`へ変更する。
 Integration ReviewのMandatory fixで再開する場合も、Finalizerだけが`reopen-task` SkillのGate確認後に`Done` Taskを`Ready`へ戻す。
 
 ## Integration and Deployment Readiness
 
 MVP全体レビューは`integration-review` Skillを使用する。
-Integration Reviewが`MVP releaseable: No`かつ`Next step: fix required`なら、`remediate-integration-review` SkillでMandatory fixを再開し、Feature Review、Finalize、Integration Review再実行まで進める。
-Cloudflare Pagesのデプロイ可否確認は`deploy-readiness` Skillを使用する。
+実行時はMVPのリリース対象Taskをリポジトリパスで明示する。
+Integration Reviewが`MVP releaseable: No`かつ`Next step: fix required`なら、`remediate-integration-review` Skillで構造化されたMandatory fixを再開し、Feature Review、Finalize、Integration Review再実行まで進める。複数Taskの場合は、元Reviewをremediation baselineとし、先に完了した対象Taskの検証済み変更だけを許容する。
+Cloudflare Pagesのデプロイ可否確認は、現在の実装を対象とした最新の合格Integration Review成果物を指定して`deploy-readiness` Skillを使用する。
 
 ChatGPT Workでは`.agents/roles/release-auditor.md`を明示し、
 Codexではカスタムエージェント`release_auditor`へ委譲する。
@@ -115,4 +118,3 @@ Codexの読み取り専用並列調査には`workflow_analyst`を使用する。
 ChatGPT WorkではCodex専用Custom Agentを前提にせず、
 選択したSkillが許可する場合だけ汎用の読み取り専用subagentを使用する。
 並列調査の上限と成果物の書き込み規則は、選択したSkillに従う。
-

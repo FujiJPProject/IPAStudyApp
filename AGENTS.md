@@ -222,12 +222,14 @@ Taskの基本状態は次のとおりとする。
 - `Ready`：対応するBuilderを開始できる。Integration Reviewの
   ブロッキング指摘で再開されたTaskも含む
 - `Blocked`：解除条件を報告して停止する
-- `Done`：明示的な新規変更要求またはIntegration Reviewの
-  ブロッキング指摘がない限り再実装しない
+- `Done`：通常の新規変更要求では再開・上書きせず、差分専用の新しい
+  Taskを作成する。Integration Reviewのブロッキング指摘がある場合だけ、
+  `reopen-task`のGateを満たして`Ready`へ戻す
 
-ブロッキングなIntegration Review結果を残したTaskを`Done`のまま
-扱ってはならない。`Done → Ready`の再開条件と再確認条件は、
-選択したSkillをSource of Truthとする。
+ブロッキングなIntegration Review結果の対象Taskをリリース完了として
+扱ってはならない。複数Taskを依存順に直す場合、まだ順番が来ていない
+TaskのStatusは`Done`のままでもremediation待ちとして追跡する。
+`Done → Ready`の再開条件と再確認条件は、選択したSkillをSource of Truthとする。
 
 ユーザー判断が必要な場合は、親Orchestratorが質問を統合して停止する。
 各サブエージェントの報告だけで次工程を決めず、
@@ -239,4 +241,3 @@ StatusとCompletion Evidenceを更新できる。
 ChatGPT WorkではRole、Skill、Taskをプロンプトから明示する。
 Codexで個別工程を実行する場合は、対応するカスタムエージェント名を
 明示して委譲する。
-

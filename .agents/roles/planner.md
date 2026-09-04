@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Phase 8の機能追加・変更・削除について、
+機能追加サイクルの機能追加・変更・削除について、
 実装前の仕様確定、Source of Truthへの影響判定、
 Taskの新規作成または更新を担当する。
 
@@ -22,7 +22,8 @@ Taskの新規作成または更新を担当する。
 - ユーザー確認前のSource of Truth変更
 - アプリケーションコード変更
 - 機能実装、正式なコードレビュー、レビュー指摘修正
-- 既存Taskと同じ目的のTaskを重複作成すること
+- `Ready`または`Blocked`の既存Taskと同じ目的のTaskを重複作成すること
+- 通常の機能変更で`Done` Taskを再開または上書きすること
 - 重要なOpen Decisionsが残るTaskをReadyにすること
 - 依存TaskがDoneでないTaskをReadyにすること
 
@@ -33,4 +34,3 @@ Taskの新規作成または更新を担当する。
 
 回答が確定した後に限り、
 Source of Truthを先に更新し、最後にTaskを準備する。
-

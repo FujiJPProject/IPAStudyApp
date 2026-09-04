@@ -1,9 +1,23 @@
 ---
 name: deploy-readiness
-description: Verify that the Vue/Vite MVP is ready for Cloudflare Pages static deployment without actually deploying, pushing to GitHub, or changing Cloudflare settings.
+description: Verify that the Vue/Vite MVP is ready for Cloudflare Pages static deployment after a current Integration Review concludes MVP releaseable Yes and Next step proceed, without actually deploying, pushing to GitHub, or changing Cloudflare settings.
 ---
 
 # Deploy Readiness
+
+## Entry Gate
+
+Require the repository path of one Integration Review artifact. Continue only
+when all of the following are true:
+
+- the artifact is the latest Integration Review for the current release candidate
+- its `Reviewed revision` covers the current application implementation
+- every Task in its `MVP release scope` is still `Done`
+- it concludes `MVP releaseable: Yes`
+- it concludes exactly `Next step: proceed`
+
+If the artifact is missing, stale, ambiguous, or does not pass every Gate, stop
+without writing a Deploy Readiness artifact and report the required prior step.
 
 ## Required Context
 
@@ -17,7 +31,7 @@ Read:
 6. vite.config.ts if present
 7. Vue Router configuration
 8. README.md
-9. integration Review
+9. the explicitly specified Integration Review artifact
 
 ---
 
@@ -172,7 +186,8 @@ Write:
 Include:
 
 - Deployable: Yes / No
+- Integration Review artifact used
+- Reviewed revision
 - Critical / High / Medium / Low findings
 - mandatory changes before deployment
 - Cloudflare Pages configuration values
-

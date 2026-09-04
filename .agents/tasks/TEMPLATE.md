@@ -18,7 +18,8 @@ Allowed values:
 - Blocked
 - Done
 
-新規Taskは原則としてBlockedから開始する。
+新規Taskは原則としてBlockedから開始する。完了済み機能への通常の
+追加・変更・削除も、既存の`Done` Taskを上書きせず、新しい差分Taskとして作成する。
 
 以下をすべて満たす場合のみReadyへ変更する。
 
@@ -26,6 +27,7 @@ Allowed values:
 - 再開Taskの場合：Integration ReviewのMandatory fixとRequired closureが指定され、Finalizerが`reopen-task` SkillのGateを満たしている
 
 `Done → Ready`は、Integration Reviewのブロッキング指摘を解消する再開時だけに許可する。
+通常の変更要求では`Done` TaskのStatusとCompletion Evidenceを変更しない。
 
 以下をすべて満たす場合のみFinalizerがDoneへ変更する。
 
@@ -167,6 +169,8 @@ Integration Reviewのブロッキング指摘により`Done → Ready`へ戻し�
 ```text
 [YYYY-MM-DD] Integration remediation
 Integration Review: .agents/reviews/integration-review-[identifier].md
+Baseline Reviewed Revision: [revision]
+Earlier Finalized Remediation Tasks: [task IDs or none]
 Blocking Findings: [finding IDs]
 Required closure: [summary]
 Previous Final Review: .agents/reviews/[task-id]-review.md

@@ -77,7 +77,9 @@ npm run build
 
 ## Completion
 
-If application code changed, require a new formal Reviewer pass.
+Always require a new formal Reviewer pass, whether or not application code
+changed. The previous Review still concludes `fix Critical / High` and cannot
+authorize Finalizer.
 Do not change the Task status and do not proceed directly to Finalizer.
 
 Report:
