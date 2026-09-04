@@ -23,8 +23,10 @@ Require all of the following:
 - the Task is `Done`
 - the Integration Review concludes `MVP releaseable: No`
 - the Integration Review concludes exactly `Next step: fix required`
+- the Integration Review records its `MVP release scope` and `Reviewed revision`
+- the recorded revision covers the current application implementation
 - at least one Mandatory fix is classified Critical or High
-- every Mandatory fix to be handled is explicitly mapped to the specified Task
+- every Mandatory fix to be handled is explicitly mapped to the specified Task repository path
 - each mapped finding has a concrete Required closure
 - the Task's latest formal Review and Completion Evidence can be identified
 

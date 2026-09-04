@@ -91,7 +91,10 @@ Read the final Review and route only from its exact decision:
 Delegate exactly one `fixer` for verified Critical / High findings.
 Do not fix Medium / Low findings in this cycle.
 
-If application code changes, return to Review unconditionally.
+After every Fixer run, return to Review. If application code changed, the new
+Review must cover that implementation. If no code changed because a finding was
+not reproducible or was incorrect, the Reviewer must still formally resolve it;
+the previous `fix Critical / High` decision cannot be used for Finalize.
 Allow at most two Fixer-to-Reviewer cycles. If Critical / High remains after the
 second cycle, stop and report the remaining evidence and required user decision.
 

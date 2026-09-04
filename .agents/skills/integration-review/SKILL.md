@@ -1,15 +1,23 @@
 ---
 name: integration-review
-description: "Review a completed MVP release candidate as a whole against requirements.md and architecture.md without changing application code. Use only after every in-scope MVP Task is Done, including after cross-cutting changes to a previously completed MVP. Do not use after every ordinary feature Task."
+description: "Review a completed MVP release candidate as a whole against requirements.md and architecture.md without changing application code. Use only with an explicit MVP release scope after every listed Task is Done, including after cross-cutting changes to a previously completed MVP. Do not use after every ordinary feature Task."
 ---
 
 # Integration Review
 
 ## Entry Gate
 
-Start only when every Task in the MVP release scope is `Done`. This includes the
+Require an explicit `MVP release scope` containing repository paths for every
+Task included in the release. Do not infer the scope from every file under
+`.agents/tasks/`.
+
+Start only when every Task in the supplied MVP release scope is `Done`. This includes the
 initial completed MVP and a previously completed MVP after cross-cutting changes
 have passed their feature-level completion gates.
+
+Confirm that the supplied Task list covers the MVP defined by
+`doc/requirements.md`. If the list is missing, ambiguous, contains an unknown
+Task, or omits a required MVP Task, stop and request a corrected scope.
 
 If any in-scope MVP Task is not `Done`, stop and report the incomplete Task
 instead of producing an Integration Review.
@@ -29,8 +37,9 @@ Read:
 5. current repository
 6. package.json
 7. package-lock.json
-8. every Task in the MVP release scope
-9. relevant feature Reviews
+8. the explicitly supplied MVP release scope
+9. every Task listed in that scope
+10. relevant feature Reviews
 
 Read `doc/ui-reference.html` for UI and learning-flow verification.
 
@@ -177,19 +186,21 @@ Write one new artifact:
 
 Use this output contract:
 
+- `MVP release scope`
+- `Reviewed revision` containing an unambiguous identifier of the reviewed repository state
 - `MVP releaseable: Yes / No`
 - `Next step: proceed / fix required / user decision required`
 - Blocking findings
   - Finding ID
   - Severity
-  - Affected Task
+  - Affected Task repository path
   - Required closure
 - Mandatory fixes before release
 - Deferrable improvements
 
 When `MVP releaseable: Yes`, conclude with exactly `Next step: proceed`.
 
-When `MVP releaseable: No` and the correction does not require a user specification decision or Task split, conclude with exactly `Next step: fix required`. Every Mandatory fix must be classified as Critical or High and include an Affected Task and Required closure.
+When `MVP releaseable: No` and the correction does not require a user specification decision or Task split, conclude with exactly `Next step: fix required`. Every Mandatory fix must be classified as Critical or High and include an Affected Task repository path and Required closure.
 
 When a requirement change, acceptance-criteria change, Task split, or another important product decision is necessary, conclude with exactly `Next step: user decision required`. Do not infer the decision.
 

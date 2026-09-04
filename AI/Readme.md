@@ -25,12 +25,14 @@ flowchart TD
 
     D --> R["Role<br/>誰として作業するか"]
     D --> S["Skill<br/>どう作業するか"]
-    D --> T["Task<br/>今回何をするか"]
-
-    T --> W["ChatGPT Work"]
-    W --> I["実装"]
-    W --> V["Review"]
-    V --> F["Fixerへ引継ぎ"]
+    D --> X["ChatGPT Work / Codex"]
+    X --> P["Plan"]
+    P --> T["Ready Task<br/>今回何をするか"]
+    T --> I["Build"]
+    I --> V["Review"]
+    V -->|"fix"| F["Fix"]
+    F --> V
+    V -->|"proceed"| Z["Finalize"]
 ```
 
 ### Role(役割)
@@ -62,7 +64,7 @@ flowchart TD
 - **foundation**
   - プロンプト手順のPhase 4でVueアプリ基盤だけを作る
 - **orchestrate-feature-cycle**
-  - CodexでPlanからFinalizeまでの状態遷移、Gate、停止・再開を管理する
+  - プロンプト手順のPhase 5で、CodexによるPlanからFinalizeまでの状態遷移、Gate、停止・再開を管理する
 - **plan-feature-change**
   - 実装前の差分・影響分析、質問、確定内容の反映、Task準備を行う
 - **implement-feature**
@@ -76,11 +78,11 @@ flowchart TD
 - **reopen-task**
   - Integration ReviewのMandatory fixに対応するDone Taskを、証跡を保って`Ready`へ戻す
 - **integration-review**
-  - プロンプト手順のPhase 9でMVP全体を横断して確認する
+  - プロンプト手順のPhase 6でMVP全体を横断して確認する
 - **remediate-integration-review**
-  - Phase 9のNG後にMandatory fix、Feature Review、Finalize、統合レビュー再実行を管理する
+  - Phase 6のNG後にMandatory fix、Feature Review、Finalize、統合レビュー再実行を管理する
 - **deploy-readiness**
-  - プロンプト手順のPhase 10でCloudflare Pagesへのデプロイ可否を確認する
+  - プロンプト手順のPhase 7でCloudflare Pagesへのデプロイ可否を確認する
 
 ### Tasks(今回の作業)
 

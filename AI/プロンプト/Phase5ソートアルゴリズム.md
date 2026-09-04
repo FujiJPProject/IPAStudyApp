@@ -1,6 +1,4 @@
-/goal
-
-$orchestrate-feature-cycle を使用し、次の機能変更を計画GateからTask完了確定まで進めてください。
+/goal $orchestrate-feature-cycle を使用し、次の機能変更を計画GateからTask完了確定まで進めてください。
 
 変更要求:
 添付の `sort_algorithm_visualizer.html` を参照し、
@@ -22,7 +20,8 @@ $orchestrate-feature-cycle を使用し、次の機能変更を計画GateからT
 
 添付HTMLはUI確認用プロトタイプです。
 HTML / CSS / JavaScriptの内部実装を、そのまま本番実装へ流用する前提にはしないでください。
-既存の要件、Task、設計、実装規約と矛盾する場合は、それらを優先してください。
+既存のSource of Truth、Task、実装規約との相違点を示し、
+仕様として採用する必要がある内容はユーザーが確定するまで変更しないでください。
 
 Candidate Reference:
 sort_algorithm_visualizer.html

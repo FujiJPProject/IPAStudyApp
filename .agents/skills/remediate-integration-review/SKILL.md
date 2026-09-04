@@ -12,7 +12,7 @@ Read completely:
 1. AGENTS.md
 2. .agents/roles/orchestrator.md
 3. the supplied Integration Review
-4. every Task named by the Review, or the Task supplied by the user
+4. the complete Task list supplied by the user and every Task named by the Review
 5. the latest formal Review for each affected Task
 6. relevant current code and tests
 
@@ -35,8 +35,11 @@ Extract every Mandatory fix and verify that each includes:
 
 - Finding ID
 - Critical or High severity
-- Affected Task
+- Affected Task repository path
 - Required closure
+
+Require the supplied Task list to match the complete, deduplicated set of
+Affected Tasks from all Mandatory fixes. Do not silently omit or add a Task.
 
 If an Affected Task is not supplied, identify it only when the Review and Task evidence make the mapping unambiguous.
 
@@ -72,7 +75,7 @@ For each affected Task in dependency order:
 5. If the Feature Review concludes exactly `Next step: fix Critical / High`, return to step 2. Allow at most two Fixer-to-Reviewer cycles for the Task.
 6. If Critical / High remains after the second cycle, or the Feature Review produces an unexpected decision, stop and report the remaining evidence and required user decision.
 7. Delegate `finalize-task` to the Finalizer only after the Feature Review concludes exactly `Next step: proceed`. The Task must be `Done` again with new Completion Evidence before continuing.
-8. After every affected Task is finalized, delegate `integration-review` to the Release Auditor and create a new, non-overwriting Integration Review artifact.
+8. After every affected Task is finalized, delegate `integration-review` to the Release Auditor using the same `MVP release scope` recorded by the supplied Review, and create a new, non-overwriting Integration Review artifact.
 9. If the new review is `MVP releaseable: No` and `Next step: fix required`, repeat this Skill from the Start Gate using that new artifact.
 10. If the new review is `Next step: user decision required`, stop and present the consolidated decision request.
 

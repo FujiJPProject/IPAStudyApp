@@ -1,6 +1,6 @@
 ---
 name: plan-feature-change
-description: Plan one Phase 8 feature addition, modification, or deletion before implementation by comparing the request and candidate references with the Source of Truth, asking the user to resolve uncertainties, updating documentation only after confirmation, and creating or updating a Task from the template.
+description: Plan one feature addition, modification, or deletion before implementation by comparing the request and candidate references with the Source of Truth, asking the user to resolve uncertainties, updating documentation only after confirmation, and creating or updating a Task from the template.
 ---
 
 # Plan Feature Change
